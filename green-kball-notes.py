@@ -11,6 +11,7 @@ import models   # ndb.Model from app engine datastore
 import time
 import logging
 # TODO: add a cron job to check and remove duplicate ids.
+# additional note.
 
 def datetime_to_li(d):
     return [
