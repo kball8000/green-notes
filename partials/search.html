@@ -1,0 +1,60 @@
+<div ng-controller='searchCtrl as search'>
+  <md-toolbar layout='row' layout-align='center center'>
+    <div flex='20' layout-padding>
+      <md-button class='md-icon-button md-raised'
+                 style='background-color:rgb(245,245,245);'
+                 ng-href="/notes">
+        <md-icon>
+          arrow_back
+        </md-icon>
+      </md-button>
+    </div>
+    <h1 class="md-toolbar-tools" flex='80'>
+      Search
+    </h1>
+  </md-toolbar>
+
+  <md-autocomplete             
+                   md-selected-item="search.selectedItem"
+                   md-search-text-change="search.textChange(search.text)"
+                   md-search-text="search.text"
+                   md-selected-item-change="search.selectedItemChange(item)"
+                   md-items="item in search.querySearch(search.text)"
+                   md-item-text="item.value"
+                   md-input-id="searchInput"
+                   md-menu-class='autocomplete-custom-template'
+                   md-min-length="0"
+                   md-no-cache="true"
+                   md-clear-button="true"
+                   md-autoselect="true"
+                   ng-disabled="!search.s.allNotes.length"
+                   placeholder="Search Notes and Titles">
+    <md-item-template>
+      <span class='item-title'>
+        {{item.title}}
+      </span>
+      <span class='item-content' md-highlight-text="search.text">
+        {{item.content}}
+      </span>
+    </md-item-template>
+    <md-not-found>
+      No results for "{{search.text}}" found.
+    </md-not-found>
+  </md-autocomplete>
+  <div layout-padding layout="row" >
+    <div flex="50">
+      <md-checkbox ng-model="search.cbFavs" 
+                   aria-label="Favs Only"
+                   class='md-hue-2'>
+        Favs only
+      </md-checkbox>
+    </div>
+    <div flex="50">
+      <md-checkbox ng-model="search.cbTrash"
+                   aria-label="In Trash"
+                   class='md-hue-2'>
+        Show Trash
+      </md-checkbox>
+    </div>
+  </div>
+</div>

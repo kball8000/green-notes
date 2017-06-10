@@ -1,0 +1,5 @@
+indexes:
+- kind: Notes
+  properties:
+  - name: user_id
+  - name: note_id

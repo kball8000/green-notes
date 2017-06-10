@@ -1,0 +1,20 @@
+<div ng-controller="restoreCtrl as rest">
+  <md-toolbar layout='row'>
+    <h3 class="md-toolbar-tools">
+      Green Notes Restore from Server Backup
+    </h3>
+  </md-toolbar>
+  <md-card>
+    <md-input-container>
+      <label>Restore Interval</label>
+      <md-select ng-model="rest.backupInterval">
+        <md-option><em>None</em></md-option>
+        <md-option ng-repeat="interval in rest.backupIntervals" 
+        ng-value="inteval" 
+        ng-disabled="$index === 1">
+          {{interval}}
+        </md-option>
+      </md-select>
+    </md-input-container>
+  </md-card>
+</div>

@@ -1,0 +1,33 @@
+@media (min-width: 960px) {
+  .mainContent {
+    padding-left: 1em;
+    padding-right: 3em;
+  }
+}
+
+/* Search Autocomplete */
+.autocomplete-custom-template li {
+  border-bottom: 1px solid #ccc;
+  height: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.autocomplete-custom-template li:last-child {
+  border-bottom-width: 0px;
+}
+.autocomplete-custom-template .item-title {
+  font-weight: bold;
+}
+.autocomplete-custom-template .item-title,
+.autocomplete-custom-template .item-content {
+  display: block;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Refinements */
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}

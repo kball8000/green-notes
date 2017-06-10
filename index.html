@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='green-note'>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--    <meta name='themecolor' content='#4cae50'>-->
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+<!--<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">-->
+<!--<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">-->
+<link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    
+    <!--  Web Application Manifest  -->
+    <link rel='manifest' href="manifest.json">
+    
+    <title>Green Notes</title>
+
+    <script src="js/lib/angular.min.js"></script>
+    <script src="js/lib/angular-animate.min.js"></script>
+    <script src="js/lib/angular-aria.min.js"></script>
+    <script src="js/lib/angular-material.min.js"></script>  
+    <script src="js/lib/angular-messages.min.js"></script>
+    <script src="js/lib/angular-route.min.js"></script>
+    <script src="js/lib/angular-sanitize.min.js"></script>
+     
+    <script src="js/main.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/services.js"></script>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/lib/angular-material.min.css">
+    <link rel="stylesheet" href="css/green-notes.css">
+    <link rel='icon' href="favicon.ico">
+
+    <script type="text/javascript">
+      var h = document.getElementsByTagName('head'),
+          elem = '<base href="' + window.location.pathname + '" />';
+      angular.element(h).append(angular.element(elem));
+    </script>
+
+  </head>
+  <body>
+<!--Do not understand need for column, came from demo, leaving for now-->
+    <div ng-controller='mainCtrl' layout='column' ng-cloak
+         ng-init="login_url=''; logout_url='';">
+      <section layout='row' flex>
+        <md-sidenav class='md-sidenav-left'
+                      md-component-id='left'
+                      md-is-locked-open="$mdMedia('gt-md')"
+                      md-whiteframe='4'>
+          <div ng-controller='leftCtrl' layout='column'>
+<!--        SIDENAV HEADER    -->
+            <md-toolbar layout='row'>
+              <h3 class="md-toolbar-tools" flex='80'>
+                Green Notes
+              </h3>
+              <div flex='20' ng-init='syncing=false;'>
+                
+                <md-button class='md-icon-button' 
+                           ng-click="sync()" 
+                           ng-disabled='syncing'
+                           style='height:64px;'>
+                  <md-progress-circular ng-disabled="!syncing" 
+                                        ng-show='syncing'
+                                        class="md-hue-3" 
+                                        md-diameter="24px">
+                  </md-progress-circular>
+                  <md-icon ng-hide='syncing'>
+                    sync
+                  </md-icon>
+                </md-button>
+              </div>
+              <div flex='20' hide-gt-md>
+                <md-button class='md-icon-button' ng-click="close()" style='height:64px;'>
+                  <md-icon>
+                    close
+                  </md-icon>
+                </md-button>
+              </div>
+            </md-toolbar>
+            
+            <button ng-click='logData()'>logD</button> <!--Testing-->
+
+
+<!--        SIDENAV CONTENT    -->
+            <md-content layout-padding style='padding-top:0;' 
+                        ng-show='userLoggedIn'>
+              <div layout='row' 
+                   flex 
+                   layout-align='center center'
+                   style='padding-bottom:0;'>
+                <div flex id='showFavsButton'>
+                  <md-button class='md-primary'
+                             style='text-align:center;'
+                             ng-class="{'md-raised': s.userPrefs.showFavs}"
+                             ng-click='setFavsFilter()'>
+                    Favs
+                  </md-button>
+                </div>
+                <div flex ng-hide='s.userPrefs.showTrash'>
+                  <md-button ng-click='toggleTrash()'
+                             class='md-icon-button'>
+                    <md-icon class='material-icons'>
+                      archive
+                    </md-icon>
+                  </md-button>
+                </div>
+                <div flex ng-show='s.userPrefs.showTrash'>
+                  <md-button ng-click='toggleTrash()' 
+                             class='md-icon-button'>
+                    <md-icon class='material-icons'>
+                      unarchive
+                    </md-icon>
+                  </md-button>
+                </div>
+                
+                <md-input-container flex>
+                  <label>Sort</label>
+                  <md-select ng-model='s.userPrefs.sortBy'>
+                    <md-option><em>Sort by:</em></md-option>
+                    <md-option ng-repeat='s in ["title", "date"]'
+                                 ng-click='setSortBy(s)'
+                                 ng-value='s'>
+                        {{s}}
+                    </md-option>
+                  </md-select>
+                </md-input-container>
+              </div>
+              <div ng-show='s.userPrefs.showTrash'>
+                <p>Items in Trash</p>
+              </div>
+              <p ng-show='!s.allNotes.length && nDB.setUserId() && !s.userPrefs.showTrash'>
+                Create a new Note!
+              </p>
+<!--              <md-list flex style='padding-top:0; width: 15em; height:10em; overflow:auto;'>-->
+              <md-list flex style='padding-top:0;'>
+                <md-list-item ng-repeat='note in s.displayNotes track by note.id'
+                              ng-click='selectNote(note)'
+                              class='secondary-button-padding'>
+                  {{note.title}}
+                </md-list-item>
+              </md-list>              
+            </md-content>
+            <div layout="row">
+              <div flex layout="row" layout-align="center">
+                <md-button class='md-primary' ng-click='reload()'>
+                  Reload App
+                </md-button>
+              </div>
+              <div flex='20' layout="row" layout-align="center">
+                <md-button ng-click='logout($event)' class='md-icon-button'>
+                  <md-icon>
+                    exit_to_app
+                  </md-icon>
+                </md-button>
+              </div>
+            </div>
+          </div>
+        </md-sidenav>
+
+<!--    NOTE TITLE / MAIN HEADER / LOGIN    -->
+<!--    No idea why 'layout='column' does not work in 'md-content'   -->
+          
+<!--    NOTE TITLE / MAIN HEADER / LOGGED IN    -->
+<!--        <md-content class='mainContent' ng-show='loaded.page && userId' flex>-->
+        <md-content class='mainContent' flex>
+          
+          <div layout="row" layout-sm="column" layout-align="space-around"
+               ng-hide='loaded.page' flex>
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+          </div>
+          
+          <div ng-view ng-show='loaded.page'></div>
+            
+<!--      APP VERSION    -->
+          <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
+            Version: 0.1.22
+          </p>
+          <button ng-click='addUserToServerList()'>AddUser</button>
+<!--          <button ng-click='goToRestore()'>Restore</button>-->
+          <button ng-href="/restore">Restore</button>
+          <a ng-href="/search"><button>Search</button></a>
+          <md-button class='md-primary md-raised'
+                     ng-href="/search">
+            Search
+          </md-button>
+          
+          <ul>
+            <li>loaded.data: {{loaded.data}}</li>
+            <li>loaded.page: {{loaded.page}}</li>
+            <li>userLoggedIn: {{userLoggedIn}}</li>
+            <li ng-repeat='note in n.allNotes'>title: {{note.title}}</li>
+          </ul>
+          
+        </md-content>
+      </section>
+    </div>
+  </body>
+  <script>
+    /* ServiceWorker requires https or localhost, not file://... */
+//    navigator.serviceWorker.register('/sw.js');
+  </script>
+</html>

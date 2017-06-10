@@ -1,0 +1,18 @@
+<md-toolbar layout='row'>
+  <h3 class="md-toolbar-tools">
+    Welcome to Green Notes
+  </h3>
+</md-toolbar>
+<md-card>
+  <md-card-actions layout='row' 
+                   layout-align='center center'
+                   style='padding:3em 0 2em 0'>
+    <div ng-mouseenter="googleImgChg('enter')"
+         ng-mouseleave="googleImgChg('leave')"
+         ng-mousedown="googleImgChg('press')">
+      <a ng-click='login(true, "userClick")' href="">
+        <img ng-src='../images/{{googleLoginImg}}'>
+      </a>
+    </div>
+  </md-card-actions>
+</md-card>

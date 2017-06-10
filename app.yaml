@@ -1,0 +1,50 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+  
+- url: /sw\.js
+  static_files: sw.js
+  upload: sw\.js
+
+- url: /manifest\.json
+  static_files: manifest.json
+  upload: manifest\.json
+
+- url: /css
+  static_dir: css
+
+- url: /js
+  static_dir: js
+
+- url: /images
+  static_dir: images
+
+- url: /partials
+  static_dir: partials
+
+# Runs backup.py
+- url: /backup
+  script: backup.app
+  login: admin
+
+# Runs green-kball-notes.py
+- url: /.*
+  script: green-kball-notes.app
+  secure: always
+
+libraries:
+- name: webapp2
+  version: "2.5.1"
+
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^(.*/)?\.sh$

@@ -1,0 +1,4 @@
+cron:
+- description: backup users notes
+  url: /backup
+  schedule: every 24 hours
