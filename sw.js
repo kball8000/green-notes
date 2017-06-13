@@ -1,11 +1,12 @@
 // Once done, update the javascript and JQuerygoogle doc.
-var CACHE_NAME = 'green-kball-notes-v0.021';
+var CACHE_NAME = 'green-kball-notes-v0.023';
 
 // HOW TO HANDLE POST REQUESTS WITH SERVICE WORKER
 
 var urlsToCache = [
     '/',
     '/notes',
+    '/restore',
     '/search',
     '/css/lib/angular-material.min.css',
     '/css/green-notes.css',
@@ -32,6 +33,7 @@ var urlsToCache = [
     '/js/lib/angular-sanitize.min.js.map',
     '/partials/login.html',
     '/partials/notes.html',
+    '/partials/restore.html',
     '/partials/search.html'
 ];
 

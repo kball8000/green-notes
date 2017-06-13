@@ -89,12 +89,14 @@ class GetRestore(webapp2.RequestHandler):
         user = users.get_current_user()
 
         if user:
-            backup_obj = models.Notes.get_notes_backup(user.user_id())
+            backup_obj = models.Backup.get_backup(user.user_id())
             
             logging.info('backup_obj: %s' %backup_obj)
+            logging.info('backup_obj user_id: %s' %backup_obj.user_id)
+            logging.info('backup_obj date: %s' %backup_obj.date)
 
-            response = "hi"
-            # response = backup_obj.info
+            # response = "hi"
+            response = backup_obj.info
         else:
             response = {'status': 'user not logged in!'}
 

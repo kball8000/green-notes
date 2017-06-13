@@ -1,20 +1,53 @@
 <div ng-controller="restoreCtrl as rest">
   <md-toolbar layout='row'>
-    <h3 class="md-toolbar-tools">
-      Green Notes Restore from Server Backup
-    </h3>
+    <div class='md-toolbar-tools'>
+      <h3 class="md-toolbar-tools">
+        Restore from Server Backup
+      </h3>
+      <md-button class='md-icon-button' 
+                 ng-href='/notes'>
+        <md-icon>
+          close
+        </md-icon>          
+      </md-button>
+    </div>
   </md-toolbar>
-  <md-card>
-    <md-input-container>
-      <label>Restore Interval</label>
-      <md-select ng-model="rest.backupInterval">
-        <md-option><em>None</em></md-option>
-        <md-option ng-repeat="interval in rest.backupIntervals" 
-        ng-value="inteval" 
-        ng-disabled="$index === 1">
-          {{interval}}
-        </md-option>
-      </md-select>
-    </md-input-container>
+
+  <md-card layout='column'>
+    <div layout='row' layout-align='center center'>
+      <md-input-container flex="50">
+        <label>Restore Interval</label>
+        <md-select ng-model="rest.backupInterval" flex>
+          <md-option ng-repeat="interval in rest.backupIntervals"
+                     ng-value="interval">
+            {{interval.display}}
+          </md-option>
+        </md-select>
+      </md-input-container>
+      <div flex="50">
+        <md-button class='md-primary md-raised' ng-click='rest.restoreAllNotes()'>
+          Restore All
+        </md-button>
+      </div>
+    </div>
   </md-card>
+    <md-list flex>
+      <md-list-item class="md-2-line md-long-text"
+                    style="margin:0;"
+                    ng-repeat='item in rest.r.restore[rest.backupInterval.value].notes'>
+        
+        <div class="md-list-item-text">
+          <h3>{{ item.info.title }}</h3>
+          <h4>{{ item.info.content }}</h4>
+          <p>{{ rest.displayDate(item.info.modified) | date:'medium' }}</p>
+        </div>
+        
+        <md-button class='md-secondary md-icon-button' 
+                   ng-click='rest.restoreNote(item.info)'>
+          <md-icon>
+            restore
+          </md-icon>          
+        </md-button>
+      </md-list-item>
+    </md-list>
 </div>

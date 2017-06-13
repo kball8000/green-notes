@@ -146,6 +146,16 @@
                   Reload App
                 </md-button>
               </div>
+
+              <div flex='20' layout="row" layout-align="center">
+                <md-button class='md-icon-button' 
+                           ng-click='goToRestore()'>
+                  <md-icon>
+                    restore
+                  </md-icon>          
+                </md-button>
+              </div>
+
               <div flex='20' layout="row" layout-align="center">
                 <md-button ng-click='logout($event)' class='md-icon-button'>
                   <md-icon>
@@ -159,9 +169,6 @@
 
 <!--    NOTE TITLE / MAIN HEADER / LOGIN    -->
 <!--    No idea why 'layout='column' does not work in 'md-content'   -->
-          
-<!--    NOTE TITLE / MAIN HEADER / LOGGED IN    -->
-<!--        <md-content class='mainContent' ng-show='loaded.page && userId' flex>-->
         <md-content class='mainContent' flex>
           
           <div layout="row" layout-sm="column" layout-align="space-around"
@@ -173,16 +180,8 @@
             
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
-            Version: 0.1.22
+            Version: 0.1.23
           </p>
-          <button ng-click='addUserToServerList()'>AddUser</button>
-<!--          <button ng-click='goToRestore()'>Restore</button>-->
-          <button ng-href="/restore">Restore</button>
-          <a ng-href="/search"><button>Search</button></a>
-          <md-button class='md-primary md-raised'
-                     ng-href="/search">
-            Search
-          </md-button>
           
           <ul>
             <li>loaded.data: {{loaded.data}}</li>
@@ -197,6 +196,6 @@
   </body>
   <script>
     /* ServiceWorker requires https or localhost, not file://... */
-//    navigator.serviceWorker.register('/sw.js');
+    navigator.serviceWorker.register('/sw.js');
   </script>
 </html>

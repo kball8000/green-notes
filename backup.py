@@ -1,6 +1,6 @@
 # Debugging Standard Imports
 # import time
-# import logging
+import logging
 
 # Main Standard Imports
 from datetime import datetime, timedelta
@@ -50,6 +50,7 @@ def process_notes(notes, backup):
     if not backup:
         backup = init_backup_obj()
         updated = True
+        logging.info('no backup exists, created: %s' %backup)
     else:
         temp = {}
         for k,v in backup.items():
@@ -76,6 +77,7 @@ def process_notes(notes, backup):
                     backup[key]['date_mod'] = prev['date_mod']
                     updated = True
 
+    logging.info('backup exist, updated: %s\nbackup: %s' %(updated, backup))
     return backup, updated
 
 class Backup(webapp2.RequestHandler):
@@ -86,7 +88,11 @@ class Backup(webapp2.RequestHandler):
         # notes_dict  = []
         updated     = False
 
+        logging.info('running backup, userids: %s' %all_users)
+
         for user_id in all_users.ids:
+
+            logging.info('running for userid: %s' %user_id)
 
             notes = models.Notes.get_notes_backup(user_id)
             notes_dict = [convert_to_dict(note) for note in notes]
@@ -100,6 +106,5 @@ class Backup(webapp2.RequestHandler):
 
                 
 app = webapp2.WSGIApplication([
-    ('/backup', Backup),
-    ('/restore', Restore)
+    ('/backup', Backup)
   ], debug=False)

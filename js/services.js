@@ -120,7 +120,12 @@ var app = angular.module('noteServices', [])
       return 1;
     }
     function sortByDate(a, b) {
-      if (a.modified < b.modified) {
+      let x   = a.modified, 
+          y   = b.modified,
+          d1  = new Date(x[0], x[1], x[2], x[3], x[4], x[5]),
+          d2  = new Date(y[0], y[1], y[2], y[3], y[4], y[5]);
+  
+      if (d1<d2) {
           return 1;
       }
       return -1;
@@ -630,8 +635,6 @@ var app = angular.module('noteServices', [])
             }
           })
         }
-        
-        console.log('getAll r', r);
         
         if (r.data.logged_in) {
           console.log('logged in and going to process notes');

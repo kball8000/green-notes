@@ -7,7 +7,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
   
 })
-.controller('mainCtrl', function($scope, $mdDialog, $mdSidenav, $http, $timeout, $location, $window, nData, nDates, nFuncs, nUtils, nServer, nDB) {
+.controller('mainCtrl', function($scope, $mdSidenav, $http, $timeout, $location, $window, nData, nDates, nFuncs, nUtils, nServer, nDB) {
   
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
@@ -15,18 +15,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     data: false,
     page: false
   }
-  
-//  DEBUGGING
-//  let uri = $window.document.baseURI;
-//  let test = uri.substr(uri.lastIndexOf("/"));
-//  function go() {
-//    $location.path('/restore');
-//  }
-//  if(uri === test) {
-//    console.log('KABOOM');
-//    $timeout(go, 3000);
-//  }
-  
+    
 //  HACK
   document.onclick = function(e) {
     let arr = ['noteArea', 'noteTitle', 'searchInput'],
@@ -71,7 +60,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     let p1 = nDB._get('allNotes').then( r => {
       try {
         nData.allNotes = r.value;
-        console.log('page should be ready, data loaded from nDB');
       } catch(e) {
         console.log('no notes yet, should display create a note msg');
       }
@@ -91,7 +79,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
       $scope.loaded.data = true;  // stops the spinner in checkappready
       nDB.setLoaded();
       nData.refreshDisplayNotes();
-      console.log('onload, refresh diplay notes, l: ' + nData.displayNotes.length);
       $scope.n = nData;
     })
   }
@@ -107,7 +94,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
         if(caller === 'userClick') {
           $window.location.href = $scope.login_url;
         } else {
-          console.log('no local or server user, set to login page');
           $location.path('/login');
           $scope.loaded.data = true;  // Stops spinner so user can log in.
         }
@@ -227,41 +213,14 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   }  
   
 // **--  LOADING APP  --**
-  
   nServer.getAll('onload');
   nDB.openDB().then(r => {
-    console.log('DB opened');
     $scope.login(true, 'onload');
     $timeout(checkAppReady, 500);
   })
-    
-  $scope.addUserToServerList = () => {
-    console.log('running addusertoserverlist')
-    let url = $window.location.origin + '/getuser';
-    $http.get(url).then( r => {console.dir(r);})
-  }   // TESTING
-  $scope.testList = note => {
-    console.log('clicked note: ' + note.title);
-  }
-// LOGOUT
-  $scope.logout = (ev) => {
-    var confirm = $mdDialog.confirm()
-          .title('Confirm Logout')
-          .textContent('Are you sure you want to logout?')
-          .ariaLabel('logout')
-          .targetEvent(ev)
-          .ok('Logout')
-          .cancel('Stay Logged In');
 
-    $mdDialog.show(confirm).then(function() {
-      $scope.login(false);
-    }, function() {
-      angular.noop;
-    });
-    
-  }
 })
-.controller('leftCtrl', function($scope, $mdSidenav, $window, nData, nDB, nFuncs, nServer) {
+.controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nFuncs, nServer) {
   $scope.syncing = false;
   $scope.numShownNotes = 2;
   $scope.showMoreText = 'More';
@@ -270,18 +229,14 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     $scope.s = nData;
     $scope.nDB = nDB;
   })
+  $scope.sync = function() {
+    $scope.syncing = true;
+    nServer.getAll('sync').then( () => {$scope.syncing = false;});
+  }
   $scope.close = function() {
     $mdSidenav('left').close();
   }
-  $scope.selectNote = function(note) { 
-    nFuncs.setPref('selectedId', note.id);
-    nData.selectNote();
-    $mdSidenav('left').close();
-  }
-  $scope.setSortBy = function(newSort) {
-    nFuncs.setPref('sortBy', newSort);
-    nData.sortDisplayNotes();
-  }
+  
   $scope.setFavsFilter = function() {
     nFuncs.setPref('showFavs', !nData.userPrefs.showFavs);
     nData.refreshDisplayNotes();
@@ -290,9 +245,15 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     nData.userPrefs.showTrash = !nData.userPrefs.showTrash;
     nData.refreshDisplayNotes();
   }
-  $scope.sync = function() {
-    $scope.syncing = true;
-    nServer.getAll('sync').then( () => {$scope.syncing = false;});
+  $scope.setSortBy = function(newSort) {
+    nFuncs.setPref('sortBy', newSort);
+    nData.sortDisplayNotes();
+  }
+
+  $scope.selectNote = function(note) { 
+    nFuncs.setPref('selectedId', note.id);
+    nData.selectNote();
+    $mdSidenav('left').close();
   }
   $scope.showMore = () => {
     console.log('running showmore, does not work well at boundary');
@@ -311,10 +272,32 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
         $scope.showMoreText = 'More'
       }
     }
-  }       // NOT IMPLEMENTED
+  }       // NOT IMPLEMENTED YET 2017 JUNE
+
+// Bottom button controls  
   $scope.reload = function() {
     $window.location.reload();
   }
+  $scope.goToRestore = () => {
+    $location.path('/restore');
+    $mdSidenav('left').close();
+  }
+  $scope.logout = (ev) => {
+    var confirm = $mdDialog.confirm()
+          .title('Confirm Logout')
+          .textContent('Are you sure you want to logout?')
+          .ariaLabel('logout')
+          .targetEvent(ev)
+          .ok('Logout')
+          .cancel('Stay Logged In');
+
+    $mdDialog.show(confirm).then(function() {
+      $scope.login(false);
+    }, () => {
+      angular.noop;
+    });  
+  }
+  
   $scope.logData = function() {
     console.log('nData: ', nData);
     console.log('nDB  : ', nDB);
@@ -335,11 +318,43 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     return nSearch.querySearch(query, this.cbFavs, this.cbTrash);
   }
 })
-.controller('restoreCtrl', function(nData, nServer) {
+.controller('restoreCtrl', function(nData, nDB, nServer, nDates) {
   
   this.r = nData;
-  console.log('restorectrl ------------');
   
-//  nServer.getRestore().then( r => console.log("getrestore", r));
+  let INTERVALS = ['Most Recent', 'One Week', 'Six Months', 'One Year'];
+  let int_arr = INTERVALS.map(item => {
+    let value = item.replace(' ', '_');
+    return { display: item, value: value.toLowerCase()};    
+  })
   
+  this.backupIntervals = int_arr;
+  this.backupInterval = int_arr[0];
+  
+  function init() {
+    nServer.getRestore().then( r => {
+      nData.restore = r;
+    });    
+  }
+  function updateNote(note) {
+    note.deleted = [];
+    note.modified = nDates.getTimestamp();
+    nData.updateNote(note.id, note);
+    nData.addToQueue([note.id])    
+  }
+  
+  this.displayDate = arr => nDates.toDate(arr)
+  this.restoreNote = note => {
+    updateNote(note);
+    nDB._put('allNotes', nData.allNotes);
+    nServer.save();
+  }
+  this.restoreAllNotes = () => {
+    let interval = this.backupInterval.value;
+    nData.restore[interval].notes.forEach( n => updateNote(n.info))
+    nDB._put('allNotes', nData.allNotes);
+    nServer.save();    
+  } 
+  
+  init();
 });
