@@ -1,27 +1,21 @@
 # Debugging Standard Imports
-# import time
-import logging
+# import logging
 
 # Main Standard Imports
 from datetime import datetime, timedelta
-import webapp2
+import time
 
 # Main Custom Imports
+import webapp2
 from google.appengine.api import users
 import models   # ndb.Model from app engine datastore
 
 INTERVALS = [
     {'key': 'most_recent', 'value': None},
-    {'key': 'one_week', 'value': timedelta(weeks=1)},
-    {'key': 'six_months', 'value': timedelta(weeks=26)},
-    {'key': 'one_year', 'value': timedelta(weeks=52)}
+    {'key': 'one_week', 'value': 7*24*60*60*1000},
+    {'key': 'six_months', 'value': 26*7*24*60*60*1000},
+    {'key': 'one_year', 'value': 52*7*24*60*60*1000}
 ]
-
-def date_obj_to_list(d):
-    return [d.year, d.month, d.day, d.hour, d.minute, d.second]
-
-def date_list_to_obj(d):
-    return datetime(d[0], d[1], d[2], d[3], d[4], d[5])
 
 def convert_to_dict(note):
     return {
@@ -29,13 +23,12 @@ def convert_to_dict(note):
         'user_id':  note.user_id,
         'info':     note.info,
         'note_id':  note.note_id,
-        'date':     date_obj_to_list(note.date)
+        'date':     note.date
     }
 
 def process_notes(notes, backup):
     """Organize the notes list within the backup object."""
-    now_obj = datetime.utcnow()
-    now_li  = date_obj_to_list(now_obj)
+    now = int(time.time()*1000)     # Time since epoch in milliseconds
     updated = False
 
     def init_backup_obj():
@@ -43,14 +36,13 @@ def process_notes(notes, backup):
         for interval in INTERVALS:
             backup[interval['key']] = {
                 'notes': notes, 
-                'date_mod': now_li
+                'date_mod': now
                 }
         return backup
 
     if not backup:
         backup = init_backup_obj()
         updated = True
-        logging.info('no backup exists, created: %s' %backup)
     else:
         temp = {}
         for k,v in backup.items():
@@ -65,11 +57,10 @@ def process_notes(notes, backup):
                 b = len(backup['most_recent']['notes']) > 0.9*len(notes)
                 if a and b:
                     backup['most_recent']['notes']      = notes
-                    backup['most_recent']['date_mod']   = now_li
+                    backup['most_recent']['date_mod']   = now
                     updated = True
             else:
-                bu_mod = date_list_to_obj(backup[key]['date_mod'])
-                if now_obj - bu_mod > limit:
+                if now - backup[key]['date_mod'] > limit:
                     prev_index  = INTERVALS.index(interval) - 1
                     prev_key    = INTERVALS[prev_index]['key']
                     prev        = temp[prev_key]
@@ -77,7 +68,6 @@ def process_notes(notes, backup):
                     backup[key]['date_mod'] = prev['date_mod']
                     updated = True
 
-    logging.info('backup exist, updated: %s\nbackup: %s' %(updated, backup))
     return backup, updated
 
 class Backup(webapp2.RequestHandler):
@@ -85,14 +75,9 @@ class Backup(webapp2.RequestHandler):
     def get(self):
         """ Update backup object with latest notes from ndb. """
         all_users   = models.UserIds.get_ids()
-        # notes_dict  = []
         updated     = False
 
-        logging.info('running backup, userids: %s' %all_users)
-
         for user_id in all_users.ids:
-
-            logging.info('running for userid: %s' %user_id)
 
             notes = models.Notes.get_notes_backup(user_id)
             notes_dict = [convert_to_dict(note) for note in notes]

@@ -39,7 +39,7 @@
         <div class="md-list-item-text">
           <h3>{{ item.info.title }}</h3>
           <h4>{{ item.info.content }}</h4>
-          <p>{{ rest.displayDate(item.info.modified) | date:'medium' }}</p>
+          <p>{{ item.info.modified | date:'medium' }}</p>
         </div>
         
         <md-button class='md-secondary md-icon-button' 

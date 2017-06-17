@@ -1,6 +1,7 @@
 from google.appengine.api import users
 from datetime import datetime, timedelta
 import json
+import time
 import webapp2
 
 # custom modules
@@ -8,20 +9,10 @@ import models   # ndb.Model from app engine datastore
 
 # debugging
 #import random
-import time
-import logging
+# import time
+# import logging
 # TODO: add a cron job to check and remove duplicate ids.
 # additional note.
-
-def datetime_to_li(d):
-    return [
-        d.year,
-        d.month,
-        d.day,
-        d.hour,
-        d.minute,
-        d.second
-    ]
 
 def verify_next_id(user, _id):
     
@@ -61,13 +52,12 @@ class GetUser(webapp2.RequestHandler):
         
         if user_id:
             models.UserIds.save_id(user_id) # Save in dict for running backups
-        else:   # TESTING
-            logging.info('USER IS NOT LOGGED IN!');
             
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response))
 
 class DelNote(webapp2.RequestHandler):
+    # Have not yet and may note implement this.
     def get(self):
         user        = users.get_current_user()
         response    = {'val': 'success'}
@@ -75,7 +65,7 @@ class DelNote(webapp2.RequestHandler):
         notes = models.Notes.get_notes(user)
         for note in notes:
             if note.info['id'] == 1:
-                logging.info('will delete key with id = 1')
+                # logging.info('will delete key with id = 1')
                 note.key.delete()
         
         self.response.headers['Content-Type'] = 'text/javascript'
@@ -90,12 +80,6 @@ class GetRestore(webapp2.RequestHandler):
 
         if user:
             backup_obj = models.Backup.get_backup(user.user_id())
-            
-            logging.info('backup_obj: %s' %backup_obj)
-            logging.info('backup_obj user_id: %s' %backup_obj.user_id)
-            logging.info('backup_obj date: %s' %backup_obj.date)
-
-            # response = "hi"
             response = backup_obj.info
         else:
             response = {'status': 'user not logged in!'}
@@ -120,7 +104,7 @@ class GetNotes(webapp2.RequestHandler):
                 response['notes'].append(note.info)
                 
             response['next_id'] = models.NoteId.get_id(user)
-            response['time']    = int(time.time()*1000)
+            response['time']    = int(time.time()*1000) # time since epoch, 1970, in milliseconds
         else:
             response['logged_in']   = False
             response['login_url']   = users.create_login_url('/')
@@ -162,12 +146,10 @@ class SaveNotes(webapp2.RequestHandler):
             except:
                 pass
             
-            logging.info('processnewnote, resp: %s' %resp)
             return resp
         
         def process_note(note):
             note_server = models.Notes.get_note(user, note['id'])
-            logging.info('note_server: %s' %note_server)
 
             resp = create_response(note)
             if not note_server:
@@ -177,12 +159,10 @@ class SaveNotes(webapp2.RequestHandler):
                 
             elif note['modified'] > note_server.info['modified']:  # STD
                 resp['saved'] = models.Notes.save_note(note_server, note)
-                logging.info('STD processREGnote, resp: %s' %resp)
                 
             elif note['modified'] < note_server.info['modified']:
                 resp['old'] = True
                 resp['update_from_server'] = note_server.info
-                logging.info('processREGnote, resp: %s' %resp)
                 
             return resp
             
@@ -204,7 +184,6 @@ class SaveNotes(webapp2.RequestHandler):
             
 
         response['next_id'] = models.NoteId.get_id(user)
-        response['timestamp'] = datetime_to_li(datetime.utcnow())
 
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response)) 

@@ -364,7 +364,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     nData.addToQueue([note.id])    
   }
   
-  this.displayDate = arr => nDates.toDate(arr)
   this.restoreNote = note => {
     updateNote(note);
     nDB._put('allNotes', nData.allNotes);
