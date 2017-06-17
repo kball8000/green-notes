@@ -62,7 +62,7 @@ class GetUser(webapp2.RequestHandler):
         if user_id:
             models.UserIds.save_id(user_id) # Save in dict for running backups
         else:   # TESTING
-            logging.info('USER IS NOT LOGGED IN');
+            logging.info('USER IS NOT LOGGED IN!');
             
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response))
