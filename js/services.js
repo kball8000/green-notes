@@ -89,7 +89,7 @@ var app = angular.module('noteServices', [])
     nDB._put('userPrefs', data.userPrefs);
     return id;
   }
-  data.initUserPrefs = function() {
+  data.inigetAlltUserPrefs = function() {
     return {
       nextId:     0,
       selectedId: 0,
@@ -453,7 +453,7 @@ var app = angular.module('noteServices', [])
       return $http.get(url);
     }
   }
-  function userLogin(url) {
+  function userLogin(url, evt) {
     let expiredUserPref = nDates.stale(nData.userPrefs.lastCloudIgnoreDate, 24*60*60*1000);
 
     if(evt !== 'onload' && expiredUserPref) {
