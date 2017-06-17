@@ -91,12 +91,13 @@
                 <div flex id='showFavsButton'>
                   <md-button class='md-primary'
                              style='text-align:center;'
-                             ng-class="{'md-raised': s.userPrefs.showFavs}"
+                             ng-class="{'md-raised': left.userPrefs.showFavs}"
                              ng-click='setFavsFilter()'>
                     Favs
                   </md-button>
                 </div>
-                <div flex ng-hide='s.userPrefs.showTrash'>
+                
+                <div flex ng-hide='left.userPrefs.showTrash'>
                   <md-button ng-click='toggleTrash()'
                              class='md-icon-button'>
                     <md-icon class='material-icons'>
@@ -104,7 +105,7 @@
                     </md-icon>
                   </md-button>
                 </div>
-                <div flex ng-show='s.userPrefs.showTrash'>
+                <div flex ng-show='left.userPrefs.showTrash'>
                   <md-button ng-click='toggleTrash()' 
                              class='md-icon-button'>
                     <md-icon class='material-icons'>
@@ -115,7 +116,7 @@
                 
                 <md-input-container flex>
                   <label>Sort</label>
-                  <md-select ng-model='s.userPrefs.sortBy'>
+                  <md-select ng-model='left.userPrefs.sortBy'>
                     <md-option><em>Sort by:</em></md-option>
                     <md-option ng-repeat='s in ["title", "date"]'
                                  ng-click='setSortBy(s)'
@@ -125,15 +126,14 @@
                   </md-select>
                 </md-input-container>
               </div>
-              <div ng-show='s.userPrefs.showTrash'>
+              <div ng-show='left.userPrefs.showTrash'>
                 <p>Items in Trash</p>
               </div>
-              <p ng-show='!s.allNotes.length && nDB.setUserId() && !s.userPrefs.showTrash'>
+              <p ng-show='!left.allNotes.length && !left.userPrefs.showTrash'>
                 Create a new Note!
               </p>
-<!--              <md-list flex style='padding-top:0; width: 15em; height:10em; overflow:auto;'>-->
               <md-list flex style='padding-top:0;'>
-                <md-list-item ng-repeat='note in s.displayNotes track by note.id'
+                <md-list-item ng-repeat='note in left.displayNotes track by note.id'
                               ng-click='selectNote(note)'
                               class='secondary-button-padding'>
                   {{note.title}}
@@ -184,9 +184,12 @@
           </p>
           
           <ul>
+            <li>leftCtrl Retries Left: {{n.retries}}</li>
+            <li>Milliseconds between client and server: {{n.timeDifference}}</li>
             <li>loaded.data: {{loaded.data}}</li>
             <li>loaded.page: {{loaded.page}}</li>
             <li>userLoggedIn: {{userLoggedIn}}</li>
+            <li>lengthDisplayNotes: {{n.displayNotes.length}}</li>
             <li ng-repeat='note in n.allNotes'>title: {{note.title}}</li>
           </ul>
           

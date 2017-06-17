@@ -59,6 +59,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   function loadData() {
     let p1 = nDB._get('allNotes').then( r => {
       try {
+        console.log('loading allNotes --SUCCESS, len: ' + r.value.length);
         nData.allNotes = r.value;
       } catch(e) {
         console.log('no notes yet, should display create a note msg');
@@ -225,9 +226,29 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.numShownNotes = 2;
   $scope.showMoreText = 'More';
   
-  nDB.waitFor('loaded').then( () => {
-    $scope.s = nData;
-    $scope.nDB = nDB;
+  console.log('running leftCtrl');
+  nDB.waitFor('loaded', 'leftCtrl').then( retries => {
+    console.log('nDB is loaded in leftCtrl' + retries);   // TESTING
+    nData.retries = retries;    // TESTING
+    $scope.left = nData;
+  }, error => {
+    
+    nData.retries = 0;    // TESTING
+    console.log('nDB is NOT loading in leftCtrl, error: ' + error);
+    
+    var confirm = $mdDialog.confirm()
+          .title('App Loading Failure')
+          .textContent('Reload App?')
+          .ariaLabel('Reload?')
+          .ok('Reload')
+          .cancel('No Thanks');
+
+    $mdDialog.show(confirm).then(function() {
+      $window.location.reload();
+    }, () => {
+      angular.noop;
+    });
+    
   })
   $scope.sync = function() {
     $scope.syncing = true;

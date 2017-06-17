@@ -76,8 +76,10 @@ var app = angular.module('noteServices', [])
     timeouts:       {db: '', server: ''},
     // pending is saves sent to server and awaiting responses.
     pendingQueue:   [],
+    retries:        0,
     serverQueue:    [],
     serverOffset:   0,
+    timeDifference: 0,    // TESTING
     userPrefs:      {}
   };
 
@@ -284,7 +286,7 @@ var app = angular.module('noteServices', [])
   
   return data;
 })
-.service('nDB', function($q, $interval, nDates){
+.service('nDB', function($q, $timeout, nDates){
   const DB_NAME     = 'greenNotesDB';
   const DB_VERSION  = 1.0;
   
@@ -320,26 +322,41 @@ var app = angular.module('noteServices', [])
     }
     return defer.promise;
   }
-  this.waitFor = function(val) {
-    var wait_defer = $q.defer();
-    var timer, retries = 20;
-    var max_interval = retries + 1;
+  this.waitFor = function(val, caller) {
+    // Sum of 1+2+..n = n*(n+1)/2, 50 retries => 1275
+    caller = caller || 'no caller specified';
+    let wait_defer  = $q.defer(),
+        retries     = 18,
+        retries_i   = retries,  // TESTING
+        max_timeout = retries + 1;
+    var t0 = 0, t1 = 0; // TESTING
 
+    function timeStep() {
+//      With retries of 18, this is minimum 30 s
+      return Math.pow((max_timeout - retries),3) + 50;
+    }
+    
     function check(){
       if(checks[val]){
-        $interval.cancel(timer);
-        wait_defer.resolve();
+        wait_defer.resolve(retries);
       } else if(retries){
+        t1 = timeStep();
+        console.log(caller + ', retries: ' + retries + ', waitFor time-other: ' + (performance.now()-t0) + 'timeout: ' + t1);
+        $timeout(check, t1);
         retries--;
       } else{
-        $interval.cancel(timer);
+        wait_defer.reject('Did not load within time limit');
       }
     }
     
     if(checks[val]){
-      wait_defer.resolve();      
+      console.log(caller + ' resolved on first try: ' + checks[val]);
+      wait_defer.resolve(0);
     } else{
-      timer = $interval(check, 2*(max_interval - retries));
+      t0 = performance.now();
+      t1 = timeStep();
+      console.log(caller + ', retries: ' + retries + ' waitFor: ' + t0 + ', t1: ' + t1);
+      $timeout(check, t1);
     }
 
     return wait_defer.promise;
@@ -362,7 +379,8 @@ var app = angular.module('noteServices', [])
     }
     
     if (userId) {
-      this.waitFor('open').then(() => put_val());
+      this.waitFor('open', 'nDB._put-open').then(() => put_val());
+//      this.waitFor('open').then(() => put_val());
     }
     
     return deferred.promise;
@@ -384,7 +402,8 @@ var app = angular.module('noteServices', [])
       }
     }
     
-    this.waitFor('open').then(r => get_val())
+    this.waitFor('open', 'nDB._get-open').then(r => get_val())
+//    this.waitFor('open').then(r => get_val())
 
     return deferred.promise;
   }
@@ -593,7 +612,8 @@ var app = angular.module('noteServices', [])
     
     httpReq('getAll').then( r => {
       /* Better name is sync. It can be ignored for the day if user wants to be in an 'offline' mode in case connectivity is slow or intermittent. */
-      nDB.waitFor('loaded').then( () => {
+//      nDB.waitFor('loaded').then( () => {
+      nDB.waitFor('loaded', 'httpReq-getall-loaded').then( () => {
         let localNote,
             updated   = false,
             serverIds = {};
@@ -604,13 +624,10 @@ var app = angular.module('noteServices', [])
             localNote = nUtils.getById(nData.allNotes, serverNote.id);
             
             if (!localNote) {
-              console.log('note from serv does not exist locally, sid' + serverNote.id);
               localNote = nData.createNoteObj(serverNote.id);
               nData.allNotes.push(localNote);
               nData.notesHashTable[localNote.id] = localNote;
-              console.log('serverNote before updating localNote', serverNote);
               nData.updateNote(serverNote.id, serverNote);
-              console.log('localNote', localNote);
               updated = true;
               
             } else if (localNote.newNote) {
@@ -625,12 +642,10 @@ var app = angular.module('noteServices', [])
               updated = true;
               
             } else if (serverNote.modified > localNote.modified) {
-              console.log('updating local note with server versions');
               nData.updateNote(serverNote.id, serverNote);
               updated = true;
               
             } else if (serverNote.modified < localNote.modified) {
-              console.log('adding to queue because local note is newer');
               nData.addToQueue([serverNote.id]);
             }
           })
@@ -640,6 +655,7 @@ var app = angular.module('noteServices', [])
           console.log('logged in and going to process notes');
           processNextId(r.data.next_id);
           processNotes(r.data.notes);
+          nData.timeDifference = Date.now() - r.data.time;
           findNotesToSync(serverIds);
           this.save();
           // TODO add some functionality to server to delete so that I can run
@@ -672,7 +688,8 @@ var app = angular.module('noteServices', [])
     var deferred = $q.defer();
     
     httpReq('getUser').then( r => {
-      nDB.waitFor('open').then( () => {
+//      nDB.waitFor('open').then( () => {
+      nDB.waitFor('open', 'getUser-open').then( () => {
         deferred.resolve(r.data.user_id);
       });
     }, () => {
@@ -685,7 +702,8 @@ var app = angular.module('noteServices', [])
     var deferred = $q.defer();
     
     httpReq('getrestore').then( r => {
-      nDB.waitFor('open').then( () => {
+//      nDB.waitFor('open').then( () => {
+      nDB.waitFor('open', 'getrestore-open').then( () => {
         deferred.resolve(r.data);
       });
     }, () => {

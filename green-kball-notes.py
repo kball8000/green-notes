@@ -120,6 +120,7 @@ class GetNotes(webapp2.RequestHandler):
                 response['notes'].append(note.info)
                 
             response['next_id'] = models.NoteId.get_id(user)
+            response['time']    = int(time.time()*1000)
         else:
             response['logged_in']   = False
             response['login_url']   = users.create_login_url('/')
