@@ -89,7 +89,7 @@ var app = angular.module('noteServices', [])
     nDB._put('userPrefs', data.userPrefs);
     return id;
   }
-  data.inigetAlltUserPrefs = function() {
+  data.initUserPrefs = function() {
     return {
       nextId:     0,
       selectedId: 0,
