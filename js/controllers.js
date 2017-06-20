@@ -59,7 +59,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   function loadData() {
     let p1 = nDB._get('allNotes').then( r => {
       try {
-        console.log('loading allNotes --SUCCESS, len: ' + r.value.length);
         nData.allNotes = r.value;
       } catch(e) {
         console.log('no notes yet, should display create a note msg');
@@ -153,7 +152,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
           $scope.userLoggedIn = true;
           nDB.setUserId(r.value);
           $location.path('/notes'); 
-//          $location.path('/search');   // TESTING
           loadData();
         } else{
           loadUserFromServer(caller);
@@ -228,13 +226,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   
   console.log('running leftCtrl');
   nDB.waitFor('loaded', 'leftCtrl').then( retries => {
-    console.log('nDB is loaded in leftCtrl' + retries);   // TESTING
     nData.retries = retries;    // TESTING
     $scope.left = nData;
-  }, error => {
-    
-    nData.retries = 0;    // TESTING
-    console.log('nDB is NOT loading in leftCtrl, error: ' + error);
+  }, error => {    
+    nData.retries = error;    // TESTING
     
     var confirm = $mdDialog.confirm()
           .title('App Loading Failure')

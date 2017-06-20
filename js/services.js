@@ -99,7 +99,7 @@ var app = angular.module('noteServices', [])
 //  Local functions 
   function hideDeletedNotes() {
     data.displayNotes = data.allNotes.filter((note) => {
-      return (data.userPrefs.showTrash) ? note.deleted.length : !note.deleted.length;  
+      return (data.userPrefs.showTrash) ? note.deleted : !note.deleted;
     });
   }
   function filterFavs() {
@@ -166,7 +166,7 @@ var app = angular.module('noteServices', [])
           fav:          false,
           created:      timestamp,
           modified:     timestamp,
-          deleted:      [],
+          deleted:      0,
           // newNote is used by server: create note or modify existing.
           newNote:      true,
           pendingSave:  [],
@@ -194,7 +194,7 @@ var app = angular.module('noteServices', [])
   }
   data.restoreNote = function() {
     data.selectedNote.modified = nDates.getTimestamp();
-    data.selectedNote.deleted  = [];
+    data.selectedNote.deleted  = 0;
     data.refreshDisplayNotes();        
   }
   data.saveNotearea = function() {
@@ -395,7 +395,7 @@ var app = angular.module('noteServices', [])
     }
     function filterTrash(arr, inTrash) {
       return arr.filter(note => {
-        return inTrash ? note.deleted.length : !note.deleted.length;
+        return inTrash ? note.deleted : !note.deleted;
       })
     }
     function filterFn(elem) {
