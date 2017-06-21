@@ -11,6 +11,8 @@ var urlsToCache = [
     '/css/lib/angular-material.min.css',
     '/css/green-notes.css',
     '/favicon.ico',
+    '/images/favicon-16x16.png',
+    '/images/favicon-32x32.png',
     '/images/btn_google_signin_dark_disabled_web.png',
     '/images/btn_google_signin_dark_focus_web.png',
     '/images/btn_google_signin_dark_normal_web.png',
