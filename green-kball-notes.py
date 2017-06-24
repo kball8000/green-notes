@@ -65,7 +65,6 @@ class DelNote(webapp2.RequestHandler):
         notes = models.Notes.get_notes(user)
         for note in notes:
             if note.info['id'] == 1:
-                # logging.info('will delete key with id = 1')
                 note.key.delete()
         
         self.response.headers['Content-Type'] = 'text/javascript'
@@ -97,6 +96,8 @@ class GetNotes(webapp2.RequestHandler):
         user        = users.get_current_user()
         response    = {'next_id': '', 'notes': []}
         
+        
+
         if user:
             response['logged_in']   = True
             notes = models.Notes.get_notes(user)
@@ -170,6 +171,7 @@ class SaveNotes(webapp2.RequestHandler):
         requests    = json.loads(self.request.body)
         
         response = {'next_id': '', 'notes': []}
+
         if user:
             response['logged_in']   = True
             for request in requests:
@@ -178,12 +180,10 @@ class SaveNotes(webapp2.RequestHandler):
                     response['notes'].append(process_new_note(request))
                 else:
                     response['notes'].append(process_note(request))
+            response['next_id'] = models.NoteId.get_id(user)
         else:
             response['logged_in']   = False
             response['login_url']   = users.create_login_url('/')
-            
-
-        response['next_id'] = models.NoteId.get_id(user)
 
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response)) 

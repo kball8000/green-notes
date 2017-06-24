@@ -122,7 +122,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
       cancelTimeout('server', cancel);
       nData.addToQueue([nData.selectedNote.id]);
       nServer.save();
-    }    
+    }
   }
   $scope.newNote = function(){
     let newNote = nData.createNoteObj();
@@ -187,7 +187,11 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.editNote = function() {
     $scope.editMode = true;
     nData.notearea = nUtils.replaceBRs(nData.selectedNote.content);
-    saveTo('server', true);   // Really just checking for an update...
+    
+    // Checking for an update with next 2 lines...
+    nData.addToQueue([nData.selectedNote.id]);
+    nServer.save();
+
     $timeout(focusTextArea);
   }
   $scope.blurNote = function(caller) {
@@ -224,7 +228,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.numShownNotes = 2;
   $scope.showMoreText = 'More';
   
-  console.log('running leftCtrl');
   nDB.waitFor('loaded', 'leftCtrl').then( retries => {
     nData.retries = retries;    // TESTING
     $scope.left = nData;
@@ -289,7 +292,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
       }
     }
   }       // NOT IMPLEMENTED YET 2017 JUNE
-
+  
 // Bottom button controls  
   $scope.reload = function() {
     $window.location.reload();

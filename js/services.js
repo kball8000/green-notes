@@ -212,6 +212,10 @@ var app = angular.module('noteServices', [])
     
     angular.forEach(newData, (value, key) => note[key] = value);
     
+    if (id === data.userPrefs.selectedId) {
+      data.notearea = nUtils.replaceBRs(newData.content);
+    }
+    
     return note;
   }
   data.alertUserIfDuplicateTitle = () => {
@@ -439,7 +443,7 @@ var app = angular.module('noteServices', [])
   }
   function userLogin(url, evt) {
     let expiredUserPref = nDates.stale(nData.userPrefs.lastCloudIgnoreDate, 24*60*60*1000);
-
+    
     if(evt !== 'onload' && expiredUserPref) {
       serverLoginDialog(url);
     } 
@@ -470,7 +474,7 @@ var app = angular.module('noteServices', [])
               processNoteResponse(note);
           });
         } else {
-          userLogin(r.data.login_url);
+          userLogin(r.data.login_url, 'savenote');
         }
       }, function(r) {
         let x = r.data || 'request failed';
@@ -633,7 +637,6 @@ var app = angular.module('noteServices', [])
         }
         
         if (r.data.logged_in) {
-          console.log('logged in and going to process notes');
           processNextId(r.data.next_id);
           processNotes(r.data.notes);
           nData.timeDifference = Date.now() - r.data.time;
@@ -647,11 +650,9 @@ var app = angular.module('noteServices', [])
 
           if (updated) {
             nDB._put('allNotes', nData.allNotes);
-            console.log('server-getall, will update display');
             nData.refreshDisplayNotes();
           }
         } else {
-          console.log('getall, user not logged in');
           userLogin(r.data.login_url, evt);
         }
         
