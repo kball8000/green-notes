@@ -157,7 +157,6 @@ class Notes(ndb.Model):
             """To keep from saving the same note in the db
             multiple times, it locks until you can retrieve the note that
             was just saved"""
-            # logging.info('beginning check func')
             counter = cls.retries
             check = cls.get_note(user, info['id'])
             while counter and not check:
@@ -198,12 +197,10 @@ class Notes(ndb.Model):
                 # less common case when 2 clients are offline and create new note, they
                 # are likely to be different and this will allow both to save.
                 if info['created'] != cls._lock.info['created']:
-                    # logging.info('id existed, saving since new title')
                     cls.save_note()
                 else:
                     # Probably a duplicate save request for some reason, do not save,
                     # but get client to remove new_note tag.
-                    # logging.info('id existed with same creation date, not saving')
                     response['saved'] = False
                     response['duplicate'] = True
 # TODO: CREATE ERROR REPORT
