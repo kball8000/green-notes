@@ -10,7 +10,7 @@ import models   # ndb.Model from app engine datastore
 # debugging
 #import random
 # import time
-import logging
+# import logging
 # TODO: add a cron job to check and remove duplicate ids.
 # additional note.
 
@@ -96,14 +96,12 @@ class GetNote(webapp2.RequestHandler):
         response        = {'logged_in': False, 'note': {}, 'updated': False}
         
         request         = json.loads(self.request.body)
-        logging.info('request: %s' %request)
         app_modified    = request['modified']
         note_id         = request['id']
 
         if user:
             response['logged_in']   = True
             note = models.Notes.get_note(user, note_id)
-            logging.info('app_mod: %s, server note: %s' %(app_modified, note))
             if app_modified < note.info['modified']:
                 response['updated'] = True
                 response['note']    = note.info
