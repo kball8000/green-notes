@@ -83,7 +83,6 @@ class GetRestore(webapp2.RequestHandler):
         else:
             response = {'status': 'user not logged in!'}
 
-
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response))
 
@@ -93,7 +92,10 @@ class GetNote(webapp2.RequestHandler):
         """For a given user, return the requested note, if updated."""
         
         user            = users.get_current_user()
-        response        = {'logged_in': False, 'note': {}, 'updated': False}
+        response        = {
+            'logged_in': False, 
+            'note': {}, 
+            'updated': False}
         
         request         = json.loads(self.request.body)
         app_modified    = request['modified']

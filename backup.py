@@ -45,7 +45,6 @@ def process_notes(notes, backup):
         return backup
 
     if not backup:
-        loggin.info('nobackup exists')
         backup = init_backup_obj()
         updated = True
     else:
@@ -59,9 +58,8 @@ def process_notes(notes, backup):
 
             if key == 'most_recent':
                 a = backup['most_recent']['notes'] != notes
-                # b = len(backup['most_recent']['notes']) > 0.9*len(notes)
                 # a real rough check so that we do not overwrite a lot of notes with zero notes.
-                b = len(notes) > 0.9*len(backup['most_recent']['notes'])
+                b = len(notes) > 0.5*len(backup['most_recent']['notes'])
                 if a and b:
                     backup['most_recent']['notes']      = notes
                     backup['most_recent']['date_mod']   = now
