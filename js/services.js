@@ -430,6 +430,9 @@ var app = angular.module('noteServices', [])
     if(_typ === 'getAll') {
       url += '/getnotes';
       return $http.get(url);
+    } else if(_typ === 'getNote') {
+      url += '/getnote';
+      return $http.post(url, data);
     } else if(_typ === 'saveNotes') {
       url += '/savenotes';
       return $http.post(url, data);
@@ -592,6 +595,23 @@ var app = angular.module('noteServices', [])
   } 
   this.save = function() {
     saveNotes();
+  }
+  this.getNote = function(note) {
+    
+    let data = {
+      id:       note.id, 
+      modified: note.modified
+    };
+    
+    httpReq('getNote', data).then( r => {
+      if (r.data.logged_in) {
+        if (r.data.updated){
+          nData.updateNote(r.data.note.id, r.data.note);
+        }
+      } else {
+        userLogin(r.data.login_url, evt);
+      }
+    })
   }
   this.getAll = function(evt) {
     var defer = $q.defer();

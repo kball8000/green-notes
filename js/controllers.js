@@ -16,7 +16,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     page: false
   }
     
-//  HACK
+//  HACK for mobile to get out of edit mode or in put fields.
   document.onclick = function(e) {
     let arr = ['noteArea', 'noteTitle', 'searchInput'],
         clickedId = e.target.id,
@@ -30,20 +30,122 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
         }
       })
     }
+  }  
+    
+// **--  LOGIN FUNCTIONS  --**
+  $scope.googleLoginImg = 'btn_google_signin_dark_normal_web.png';
+  $scope.googleImgChg = function(evt) {
+    let obj = {
+      'enter': 'btn_google_signin_dark_focus_web.png',
+      'leave': 'btn_google_signin_dark_normal_web.png',
+      'press': 'btn_google_signin_dark_pressed_web.png'
+    }
+    $scope.googleLoginImg = obj[evt];
   }
-  
+  $scope.login = function(login, caller) {
+    if (login) {
+      nDB._get('userId', true).then( r => {
+        if (r && r.value) {
+          $scope.userLoggedIn = true;
+          nDB.setUserId(r.value);
+          $location.path('/notes'); 
+          loadData();
+        } else{
+          loadUserFromServer(caller);
+        }
+      });
+    } else {    // logout
+      nDB.setUserId(undefined);
+      nDB._put('userId', undefined, true).then( () => {
+        $window.location.href = $scope.logout_url;
+      });
+    }
+  }
+    
+// **--  NOTES FUNCTIONS  --**
   function focusTextArea() {
     let el = $window.document.getElementById('noteArea');
     el.focus();
     el.selectionStart = 0;
     el.selectionEnd = 0;
   }
-  // SIDENAV //
-  $scope.open = function() {
-    $mdSidenav('left').open();
+  function saveTo(db, cancel) {
+    function cancelTimeout(db, cancel) {
+      if(cancel){
+        $timeout.cancel(nData.timeouts[db]);
+      }
+      nData.timeouts[db] = '';      
+    }
+    nData.saveNotearea();
+    
+    if (db === 'db' || db === 'both') {
+      cancelTimeout('db', cancel);
+      nDB._put('allNotes', nData.allNotes);
+    } 
+    if (db === 'server' || db === 'both') {
+      cancelTimeout('server', cancel);
+      nData.addToQueue([nData.selectedNote.id]);
+      nServer.save();
+    }
   }
-
-// LOADING APP HELPER FUNCTIONS
+  $scope.newNote = function(){
+    let newNote = nData.createNoteObj();
+    nData.allNotes.push(newNote);
+    nFuncs.setPref('selectedId', newNote.id);
+    nData.refreshDisplayNotes();
+    
+    $scope.editMode = true;     // To display textarea.
+    
+    saveTo('both');
+  }
+  $scope.starNote = function() {
+    nData.selectedNote.fav = !nData.selectedNote.fav;
+    nData.modified = nDates.getTimestamp();
+    saveTo('both', true);
+  }
+  $scope.removeNote = function() {
+    nData.removeNote();
+    saveTo('both', true);
+  }
+  $scope.restoreNote = function() {
+    nData.restoreNote();
+    saveTo('both', true);
+  }
+  $scope.editNote = function() {
+    /* Change from view only to edit mode so user can edit the selected note */
+    
+    // Checks for updated note on server.
+    nServer.getNote(note);              
+    
+    // Toggle from view only to edit mode on screen.
+    $scope.editMode = true;
+    nData.notearea  = nUtils.replaceBRs(nData.selectedNote.content);
+    $timeout(focusTextArea);
+  }
+  $scope.blurNote = function(caller) {
+    
+    if (caller === 'title') {
+      // leave edit note mode alone...
+      nData.alertUserIfDuplicateTitle();
+    } else {
+      $scope.editMode = false;
+    }
+    
+    saveTo('both', true); 
+    nData.sortDisplayNotes();
+  }
+  $scope.noteChg = function() {
+    /*Runs anytime there is a change in the note input field in the app. Sets
+    timeouts so that we are not saving to db and server on every character change.*/
+    if (!nData.timeouts.dbSave) {
+      nData.timeouts.dbSave = $timeout(saveTo, 4000, true, 'db');
+    }
+    if (!nData.timeouts.serverSave) {
+      nData.timeouts.serverSave = $timeout(saveTo, 8000, true, 'server');
+    }
+  }
+  
+// **--  LOADING APP  --**
   let retries = 25;
   function checkAppReady() {
     if ($scope.loaded.data) {
@@ -103,124 +205,19 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
       $scope.loaded.data = true;
     })
   }
-    
-// **--  NOTES  --**
-  function saveTo(db, cancel) {
-    function cancelTimeout(db, cancel) {
-      if(cancel){
-        $timeout.cancel(nData.timeouts[db]);
-      }
-      nData.timeouts[db] = '';      
-    }
-    nData.saveNotearea();
-    
-    if (db === 'db' || db === 'both') {
-      cancelTimeout('db', cancel);
-      nDB._put('allNotes', nData.allNotes);
-    } 
-    if (db === 'server' || db === 'both') {
-      cancelTimeout('server', cancel);
-      nData.addToQueue([nData.selectedNote.id]);
-      nServer.save();
-    }
-  }
-  $scope.newNote = function(){
-    let newNote = nData.createNoteObj();
-    nData.allNotes.push(newNote);
-    nFuncs.setPref('selectedId', newNote.id);
-    nData.refreshDisplayNotes();
-    
-    $scope.editMode = true;     // To display textarea.
-    
-    saveTo('both');
-  }
-  
-// **--  LOGIN FUNCTIONS  --**
-  $scope.googleLoginImg = 'btn_google_signin_dark_normal_web.png';
-  $scope.googleImgChg = function(evt) {
-    let obj = {
-      'enter': 'btn_google_signin_dark_focus_web.png',
-      'leave': 'btn_google_signin_dark_normal_web.png',
-      'press': 'btn_google_signin_dark_pressed_web.png'
-    }
-    $scope.googleLoginImg = obj[evt];
-  }
-  $scope.login = function(login, caller) {
-    if (login) {
-      nDB._get('userId', true).then( r => {
-        if (r && r.value) {
-          $scope.userLoggedIn = true;
-          nDB.setUserId(r.value);
-          $location.path('/notes'); 
-          loadData();
-        } else{
-          loadUserFromServer(caller);
-        }
-      });
-    } else {    // logout
-      nDB.setUserId(undefined);
-      nDB._put('userId', undefined, true).then( () => {
-        $window.location.href = $scope.logout_url;
-      });
-    }
-  }
-  
-// **--  ERROR PAGE FUNCTIONS  --**
-  $scope.reload = function() {
-    $window.location.reload();
-  }
-  
-// **--  MORE NOTES FUNCTIONS  --**
-  $scope.starNote = function() {
-    nData.selectedNote.fav = !nData.selectedNote.fav;
-    nData.modified = nDates.getTimestamp();
-    saveTo('both', true);
-  }
-  $scope.removeNote = function() {
-    nData.removeNote();
-    saveTo('both', true);
-  }
-  $scope.restoreNote = function() {
-    nData.restoreNote();
-    saveTo('both', true);
-  }
-  $scope.editNote = function() {
-    $scope.editMode = true;
-    nData.notearea = nUtils.replaceBRs(nData.selectedNote.content);
-    
-    // Checking for an update with next 2 lines...
-    nData.addToQueue([nData.selectedNote.id]);
-    nServer.save();
-
-    $timeout(focusTextArea);
-  }
-  $scope.blurNote = function(caller) {
-    
-    if (caller === 'title') {
-      // leave edit note mode alone...
-      nData.alertUserIfDuplicateTitle();
-    } else {
-      $scope.editMode = false;
-    }
-    
-    saveTo('both', true); 
-    nData.sortDisplayNotes();
-  }
-  $scope.noteChg = function() {
-    if (!nData.timeouts.dbSave) {
-      nData.timeouts.dbSave = $timeout(saveTo, 4000, true, 'db');
-    }
-    if (!nData.timeouts.serverSave) {
-      nData.timeouts.serverSave = $timeout(saveTo, 8000, true, 'server');
-    }
-  }  
-  
-// **--  LOADING APP  --**
   nServer.getAll('onload');
   nDB.openDB().then(r => {
     $scope.login(true, 'onload');
     $timeout(checkAppReady, 500);
   })
+
+// **--  SIDENAV and ERROR PAGE FUNCTIONS  --**
+  $scope.open = function() {
+    $mdSidenav('left').open();
+  }
+  $scope.reload = function() {
+    $window.location.reload();
+  }
 
 })
 .controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nFuncs, nServer) {
@@ -272,6 +269,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.selectNote = function(note) { 
     nFuncs.setPref('selectedId', note.id);
     nData.selectNote();
+    nServer.getNote(note);              // Checks for updated note on server.
     $mdSidenav('left').close();
   }
   $scope.showMore = () => {

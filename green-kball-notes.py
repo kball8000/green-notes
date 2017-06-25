@@ -10,7 +10,7 @@ import models   # ndb.Model from app engine datastore
 # debugging
 #import random
 # import time
-# import logging
+import logging
 # TODO: add a cron job to check and remove duplicate ids.
 # additional note.
 
@@ -87,6 +87,31 @@ class GetRestore(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response))
 
+class GetNote(webapp2.RequestHandler):
+    """Return an individual note, if updated, to app"""
+    def post(self):
+        """For a given user, return the requested note, if updated."""
+        
+        user            = users.get_current_user()
+        response        = {'logged_in': False, 'note': {}, 'updated': False}
+        
+        request         = json.loads(self.request.body)
+        logging.info('request: %s' %request)
+        app_modified    = request['modified']
+        note_id         = request['id']
+
+        if user:
+            response['logged_in']   = True
+            note = models.Notes.get_note(user, note_id)
+            logging.info('app_mod: %s, server note: %s' %(app_modified, note))
+            if app_modified < note.info['modified']:
+                response['updated'] = True
+                response['note']    = note.info
+        else:
+            response['login_url']   = users.create_login_url('/')
+        
+        self.response.headers['Content-Type'] = 'text/javascript'
+        self.response.write(json.dumps(response))
 class GetNotes(webapp2.RequestHandler):
     """Return all notes to app"""
     def get(self):
@@ -96,8 +121,6 @@ class GetNotes(webapp2.RequestHandler):
         user        = users.get_current_user()
         response    = {'next_id': '', 'notes': []}
         
-        
-
         if user:
             response['logged_in']   = True
             notes = models.Notes.get_notes(user)
@@ -200,5 +223,6 @@ app = webapp2.WSGIApplication([
     ('/savenotes', SaveNotes),
     ('/delnote', DelNote),
     ('/getrestore', GetRestore),
+    ('/getnote', GetNote),
     ('/getnotes', GetNotes)
   ], debug=False)
