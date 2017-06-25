@@ -2,12 +2,11 @@
 all objects used and their core methods."""
 
 # Debugging Standard Imports
-import logging
+# import logging
 
 # Main Standard Imports
 import threading
 import time
-# from datetime import datetime
 
 # Main Custom Imports
 from google.appengine.ext import ndb
@@ -19,7 +18,6 @@ def create_id(user):
 
 class Backup(ndb.Model):
     """Backup class used for backup up user's notes in an array"""
-    # email   = ndb.StringProperty(indexed=False)
     user_id = ndb.StringProperty(indexed=True)
     info = ndb.JsonProperty(compressed=True)
     date = ndb.DateTimeProperty(auto_now=True)
@@ -159,7 +157,6 @@ class Notes(ndb.Model):
             """To keep from saving the same note in the db
             multiple times, it locks until you can retrieve the note that
             was just saved"""
-            logging.info('beginning check func')
             counter = cls.retries
             check = cls.get_note(user, info['id'])
             while counter and not check:
@@ -169,15 +166,12 @@ class Notes(ndb.Model):
                 counter -= 1
                 # TODO: Log error if counter == 0
 
-            logging.info('completed check func, counter: %s' %counter)
-
         def save_note():
             """Saves an individual note to ndb"""
 
             if get_id:
                 info['id'] = NoteId.obtain_next_id(user)
 
-            logging.info('save note fn, creating note obj, real id: %s' %info['id'])
             info['newNote'] = False
             cls._lock = Notes(
                 email=user.email(),
@@ -203,17 +197,14 @@ class Notes(ndb.Model):
                 # less common case when 2 clients are offline and create new note, they
                 # are likely to be different and this will allow both to save.
                 if info['created'] != cls._lock.info['created']:
-                    logging.info('id existed, saving since new title')
                     cls.save_note()
                 else:
                     # Probably a duplicate save request for some reason, do not save,
                     # but get client to remove new_note tag.
-                    logging.info('id existed with same creation date, not saving')
                     response['saved'] = False
                     response['duplicate'] = True
 # TODO: CREATE ERROR REPORT
 
-        logging.info('newnote response: %s' %response)
         response['id'] = info['id']
 
         return response

@@ -4,19 +4,14 @@ The way it works is send once, then put in a 'pending queue' for 1 minute. If no
 
 var app = angular.module('noteServices', [])
 .service('nDates', function(){
-  this.getTimestamp = function(d) {
-    d = d || new Date();
-    d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
-    
-    return [d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
-  }
-  this.toDate = function(arr) {
-    let d = new Date(arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]); 
-    return d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  // this.getTimestamp = () => Date.now();  // Code Simplification
+
+  this.getTimestamp = function() {
+    return Date.now();
   }
   this.stale = function(timestamp, duration) {
-    timestamp = timestamp || [1900,0,1,0,0,0];
-    return new Date() - this.toDate(timestamp) > duration;
+    timestamp = timestamp || 0;
+    return Date.now() - timestamp > duration;
   }
 })
 .service('nFuncs', function(nData, nDB) {
@@ -76,7 +71,7 @@ var app = angular.module('noteServices', [])
     timeouts:       {db: '', server: ''},
     // pending is saves sent to server and awaiting responses.
     pendingQueue:   [],
-    retries:        0,
+    retries:        0,    // TESTING
     serverQueue:    [],
     serverOffset:   0,
     timeDifference: 0,    // TESTING
@@ -104,7 +99,7 @@ var app = angular.module('noteServices', [])
 //  Local functions 
   function hideDeletedNotes() {
     data.displayNotes = data.allNotes.filter((note) => {
-      return (data.userPrefs.showTrash) ? note.deleted.length : !note.deleted.length;  
+      return (data.userPrefs.showTrash) ? note.deleted : !note.deleted;
     });
   }
   function filterFavs() {
@@ -114,21 +109,14 @@ var app = angular.module('noteServices', [])
   }
   function sortDisplayNotes() {
     function sortByTitle(a, b) {
-      a = angular.lowercase(a.title);
-      b = angular.lowercase(b.title);
-      if(a < b) {
+      if(a.title.toLowerCase() < b.title.toLowerCase()) {
         return -1;
       }
       return 1;
     }
     function sortByDate(a, b) {
-      let x   = a.modified, 
-          y   = b.modified,
-          d1  = new Date(x[0], x[1], x[2], x[3], x[4], x[5]),
-          d2  = new Date(y[0], y[1], y[2], y[3], y[4], y[5]);
-  
-      if (d1<d2) {
-          return 1;
+      if (a.modified<b.modified) {
+        return 1;
       }
       return -1;
     }
@@ -178,7 +166,7 @@ var app = angular.module('noteServices', [])
           fav:          false,
           created:      timestamp,
           modified:     timestamp,
-          deleted:      [],
+          deleted:      0,
           // newNote is used by server: create note or modify existing.
           newNote:      true,
           pendingSave:  [],
@@ -206,7 +194,7 @@ var app = angular.module('noteServices', [])
   }
   data.restoreNote = function() {
     data.selectedNote.modified = nDates.getTimestamp();
-    data.selectedNote.deleted  = [];
+    data.selectedNote.deleted  = 0;
     data.refreshDisplayNotes();        
   }
   data.saveNotearea = function() {
@@ -223,6 +211,10 @@ var app = angular.module('noteServices', [])
     let note = nUtils.getById(data.allNotes, id);
     
     angular.forEach(newData, (value, key) => note[key] = value);
+    
+    if (id === data.userPrefs.selectedId) {
+      data.notearea = nUtils.replaceBRs(newData.content);
+    }
     
     return note;
   }
@@ -323,7 +315,7 @@ var app = angular.module('noteServices', [])
     return defer.promise;
   }
   this.waitFor = function(val, caller) {
-    // Sum of 1+2+..n = n*(n+1)/2, 50 retries => 1275
+    // TODO: Clean this up.
     caller = caller || 'no caller specified';
     let wait_defer  = $q.defer(),
         retries     = 18,
@@ -332,7 +324,7 @@ var app = angular.module('noteServices', [])
     var t0 = 0, t1 = 0; // TESTING
 
     function timeStep() {
-//      With retries of 18, this is minimum 30 s
+//      With retries of 18, this is minimum 30s
       return Math.pow((max_timeout - retries),3) + 50;
     }
     
@@ -340,23 +332,17 @@ var app = angular.module('noteServices', [])
       if(checks[val]){
         wait_defer.resolve(retries);
       } else if(retries){
-        t1 = timeStep();
-        console.log(caller + ', retries: ' + retries + ', waitFor time-other: ' + (performance.now()-t0) + 'timeout: ' + t1);
-        $timeout(check, t1);
+        $timeout(check, timeStep());
         retries--;
       } else{
-        wait_defer.reject('Did not load within time limit');
+        wait_defer.reject('Did not load: ' + caller + ' within time limit');
       }
     }
     
     if(checks[val]){
-      console.log(caller + ' resolved on first try: ' + checks[val]);
       wait_defer.resolve(0);
     } else{
-      t0 = performance.now();
-      t1 = timeStep();
-      console.log(caller + ', retries: ' + retries + ' waitFor: ' + t0 + ', t1: ' + t1);
-      $timeout(check, t1);
+      $timeout(check, timeStep());
     }
 
     return wait_defer.promise;
@@ -379,8 +365,7 @@ var app = angular.module('noteServices', [])
     }
     
     if (userId) {
-      this.waitFor('open', 'nDB._put-open').then(() => put_val());
-//      this.waitFor('open').then(() => put_val());
+      this.waitFor('open').then(() => put_val());
     }
     
     return deferred.promise;
@@ -402,8 +387,7 @@ var app = angular.module('noteServices', [])
       }
     }
     
-    this.waitFor('open', 'nDB._get-open').then(r => get_val())
-//    this.waitFor('open').then(r => get_val())
+    this.waitFor('open').then(r => get_val())
 
     return deferred.promise;
   }
@@ -415,7 +399,7 @@ var app = angular.module('noteServices', [])
     }
     function filterTrash(arr, inTrash) {
       return arr.filter(note => {
-        return inTrash ? note.deleted.length : !note.deleted.length;
+        return inTrash ? note.deleted : !note.deleted;
       })
     }
     function filterFn(elem) {
@@ -437,11 +421,18 @@ var app = angular.module('noteServices', [])
   }
 })
 .service('nServer', function($http, $mdDialog, $q, $window, nData, nDates, nDB, nFuncs, nUtils){
+  // function httpReq(_typ, url, data){
+  //   url = $window.location.origin + url;
+  //   return $http[_typ](url, data);
+  // }    // CODE SIMPLIFICATION, will need to rewrite how I call them.
   function httpReq(_typ, data){
     var url = $window.location.origin;
     if(_typ === 'getAll') {
       url += '/getnotes';
       return $http.get(url);
+    } else if(_typ === 'getNote') {
+      url += '/getnote';
+      return $http.post(url, data);
     } else if(_typ === 'saveNotes') {
       url += '/savenotes';
       return $http.post(url, data);
@@ -455,7 +446,7 @@ var app = angular.module('noteServices', [])
   }
   function userLogin(url, evt) {
     let expiredUserPref = nDates.stale(nData.userPrefs.lastCloudIgnoreDate, 24*60*60*1000);
-
+    
     if(evt !== 'onload' && expiredUserPref) {
       serverLoginDialog(url);
     } 
@@ -481,14 +472,12 @@ var app = angular.module('noteServices', [])
       httpReq('saveNotes', nData.serverQueue).then( r => {
         if(r.data.logged_in) {
           processNextId(r.data.next_id);
+          nData.timeDifference = Date.now() - r.data.time;
           angular.forEach(r.data.notes, note => {
               processNoteResponse(note);
           });
-        // Not using next 2 lines currently in syncing solution 2017 May 16.
-          r.data.timestamp[1]--; // convert month to javascript;
-          processTimeSync(r.data.timestamp);          
         } else {
-          userLogin(r.data.login_url);
+          userLogin(r.data.login_url, 'savenote');
         }
       }, function(r) {
         let x = r.data || 'request failed';
@@ -501,7 +490,7 @@ var app = angular.module('noteServices', [])
     
     nUtils.removeById(nData.pendingQueue, note.id);
     
-    if (!angular.equals(note.modified, modified_serv)) {
+    if (note.modified !== modified_serv) {
       nData.addToQueue([note.id]);
       saveNotes();
     }
@@ -607,13 +596,29 @@ var app = angular.module('noteServices', [])
   this.save = function() {
     saveNotes();
   }
+  this.getNote = function(note) {
+    
+    let data = {
+      id:       note.id, 
+      modified: note.modified
+    };
+    
+    httpReq('getNote', data).then( r => {
+      if (r.data.logged_in) {
+        if (r.data.updated){
+          nData.updateNote(r.data.note.id, r.data.note);
+        }
+      } else {
+        userLogin(r.data.login_url, evt);
+      }
+    })
+  }
   this.getAll = function(evt) {
     var defer = $q.defer();
     
     httpReq('getAll').then( r => {
       /* Better name is sync. It can be ignored for the day if user wants to be in an 'offline' mode in case connectivity is slow or intermittent. */
-//      nDB.waitFor('loaded').then( () => {
-      nDB.waitFor('loaded', 'httpReq-getall-loaded').then( () => {
+      nDB.waitFor('loaded').then( () => {
         let localNote,
             updated   = false,
             serverIds = {};
@@ -652,7 +657,6 @@ var app = angular.module('noteServices', [])
         }
         
         if (r.data.logged_in) {
-          console.log('logged in and going to process notes');
           processNextId(r.data.next_id);
           processNotes(r.data.notes);
           nData.timeDifference = Date.now() - r.data.time;
@@ -666,11 +670,9 @@ var app = angular.module('noteServices', [])
 
           if (updated) {
             nDB._put('allNotes', nData.allNotes);
-            console.log('server-getall, will update display');
             nData.refreshDisplayNotes();
           }
         } else {
-          console.log('getall, user not logged in');
           userLogin(r.data.login_url, evt);
         }
         
@@ -688,8 +690,7 @@ var app = angular.module('noteServices', [])
     var deferred = $q.defer();
     
     httpReq('getUser').then( r => {
-//      nDB.waitFor('open').then( () => {
-      nDB.waitFor('open', 'getUser-open').then( () => {
+      nDB.waitFor('open').then( () => {
         deferred.resolve(r.data.user_id);
       });
     }, () => {
@@ -702,8 +703,7 @@ var app = angular.module('noteServices', [])
     var deferred = $q.defer();
     
     httpReq('getrestore').then( r => {
-//      nDB.waitFor('open').then( () => {
-      nDB.waitFor('open', 'getrestore-open').then( () => {
+      nDB.waitFor('open').then( () => {
         deferred.resolve(r.data);
       });
     }, () => {
