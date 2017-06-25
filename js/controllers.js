@@ -114,12 +114,14 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.editNote = function() {
     /* Change from view only to edit mode so user can edit the selected note */
     
+    let note = nData.selectedNote;
+    
     // Checks for updated note on server.
-    nServer.getNote(note);              
+    nServer.getNote(note);
     
     // Toggle from view only to edit mode on screen.
     $scope.editMode = true;
-    nData.notearea  = nUtils.replaceBRs(nData.selectedNote.content);
+    nData.notearea  = nUtils.replaceBRs(note.content);
     $timeout(focusTextArea);
   }
   $scope.blurNote = function(caller) {
