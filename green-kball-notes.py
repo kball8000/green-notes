@@ -10,7 +10,7 @@ import models   # ndb.Model from app engine datastore
 # debugging
 #import random
 # import time
-# import logging
+import logging
 # TODO: add a cron job to check and remove duplicate ids.
 # additional note.
 
@@ -77,8 +77,11 @@ class GetRestore(webapp2.RequestHandler):
         """ Update backup object with latest notes from ndb. """
         user = users.get_current_user()
 
+        logging.info('getrestor, user: %s' %user)
+
         if user:
             backup_obj = models.Backup.get_backup(user.user_id())
+            logging.info('getrestor, backup_obj: %s' %backup_obj)
             response = backup_obj.info
         else:
             response = {'status': 'user not logged in!'}
