@@ -68,6 +68,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     el.focus();
     el.selectionStart = 0;
     el.selectionEnd = 0;
+
+    // quirky, if I left this in edit note, caused complete note to toggle, edit note worked fine.
+    // hurts my head to think about why that was.
+    $scope.editMode = true;
   }
   function saveTo(db, cancel) {
     function cancelTimeout(db, cancel) {
@@ -113,23 +117,25 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   }
   $scope.editNote = function() {
     /* Change from view only to edit mode so user can edit the selected note */
-    
+    console.log('running editnote');
     let note = nData.selectedNote;
     
     // Checks for updated note on server.
     nServer.getNote(note);
     
     // Toggle from view only to edit mode on screen.
-    $scope.editMode = true;
+    // $scope.editMode = true;  // moved to focusTextArea because of weirdness.
     nData.notearea  = nUtils.replaceBRs(note.content);
     $timeout(focusTextArea);
   }
   $scope.blurNote = function(caller) {
+    console.log('running blurnote');
     
     if (caller === 'title') {
       // leave edit note mode alone...
       nData.alertUserIfDuplicateTitle();
     } else {
+      console.log('running blurnote, setting editnote to false');
       $scope.editMode = false;
     }
     

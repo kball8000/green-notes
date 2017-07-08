@@ -41,19 +41,10 @@
   <div flex layout='row' layout-align='center center'>
     <div flex='35'>
       <md-button class='md-icon-button md-raised md-primary'
-                 ng-click='editNote()'
-                 ng-hide='editMode'
+                 ng-click='editMode ? blurNote() : editNote()'
                  ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'>
         <md-icon>
-          edit
-        </md-icon>
-      </md-button>
-      <md-button class='md-icon-button md-raised md-primary' 
-                 ng-click='blurNote()'
-                 ng-disabled='n.userPrefs.noNote'
-                 ng-show='editMode'>
-        <md-icon>
-          done
+          {{editMode ? 'done' : 'edit' }}
         </md-icon>
       </md-button>
     </div>  
@@ -72,37 +63,23 @@
       <md-button class='md-icon-button md-primary'
                  ng-click='starNote()'
                  ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'>
-        <md-icon ng-show='n.selectedNote.fav'>
-          star
-        </md-icon>
-        <md-icon ng-hide='n.selectedNote.fav'>
-          star_border
+        <md-icon>
+          {{n.selectedNote.fav ? 'star' : 'star_border'}}
         </md-icon>
       </md-button>
     </div>
     <div flex='20' 
-         style="text-align:center;" 
-         ng-hide='n.userPrefs.showTrash'>
+         style="text-align:center;">
       <md-button class='md-icon-button md-primary'
-                 ng-click='removeNote()'
+                 ng-click='n.userPrefs.showTrash ? restoreNote() : removeNote()'
                  ng-disabled='n.userPrefs.noNote'>
-        <md-icon class='material-icons'>
-          delete
-        </md-icon>
-      </md-button>
-    </div>
-    <div id='restoreBtn' flex='20' 
-         style="text-align:center;" 
-         ng-show='n.userPrefs.showTrash'>
-      <md-button class='md-icon-button md-primary'
-                 ng-click='restoreNote()'
-                 ng-disabled='n.userPrefs.noNote'>
-        <md-icon class='material-icons'>
-          restore
+        <md-icon>
+          {{n.userPrefs.showTrash ? 'restore' : 'delete'}}
         </md-icon>
       </md-button>
     </div>
   </div>
+
         
 <!--      DISPLAY / EDIT SELECTED NOTE CONTENT    -->
   <md-card flex ng-hide='editMode'>

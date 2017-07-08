@@ -97,19 +97,11 @@
                   </md-button>
                 </div>
                 
-                <div flex ng-hide='left.userPrefs.showTrash'>
+                <div flex>
                   <md-button ng-click='toggleTrash()'
                              class='md-icon-button'>
                     <md-icon class='material-icons'>
-                      archive
-                    </md-icon>
-                  </md-button>
-                </div>
-                <div flex ng-show='left.userPrefs.showTrash'>
-                  <md-button ng-click='toggleTrash()' 
-                             class='md-icon-button'>
-                    <md-icon class='material-icons'>
-                      unarchive
+                      {{left.userPrefs.showTrash ? 'archive' : 'unarchive'}}
                     </md-icon>
                   </md-button>
                 </div>
