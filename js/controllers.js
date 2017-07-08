@@ -7,7 +7,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
   
 })
-.controller('mainCtrl', function($scope, $mdSidenav, $http, $timeout, $location, $window, nData, nDates, nFuncs, nUtils, nServer, nDB) {
+.controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
   
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
@@ -68,6 +68,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     el.focus();
     el.selectionStart = 0;
     el.selectionEnd = 0;
+
+    // quirky, if I left this in edit note, caused complete note to toggle, edit note worked fine.
+    // hurts my head to think about why that was.
+//    $scope.editMode = true;
   }
   function saveTo(db, cancel) {
     function cancelTimeout(db, cancel) {
@@ -91,7 +95,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.newNote = function(){
     let newNote = nData.createNoteObj();
     nData.allNotes.push(newNote);
-    nFuncs.setPref('selectedId', newNote.id);
+    nData.setPref('selectedId', newNote.id);
     nData.refreshDisplayNotes();
     
     $scope.editMode = true;     // To display textarea.
@@ -113,14 +117,13 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   }
   $scope.editNote = function() {
     /* Change from view only to edit mode so user can edit the selected note */
-    
     let note = nData.selectedNote;
     
     // Checks for updated note on server.
     nServer.getNote(note);
     
     // Toggle from view only to edit mode on screen.
-    $scope.editMode = true;
+    $scope.editMode = true; 
     nData.notearea  = nUtils.replaceBRs(note.content);
     $timeout(focusTextArea);
   }
@@ -222,7 +225,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   }
 
 })
-.controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nFuncs, nServer) {
+.controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer) {
   $scope.syncing = false;
   $scope.numShownNotes = 2;
   $scope.showMoreText = 'More';
@@ -256,7 +259,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   }
   
   $scope.setFavsFilter = function() {
-    nFuncs.setPref('showFavs', !nData.userPrefs.showFavs);
+    nData.setPref('showFavs', !nData.userPrefs.showFavs);
     nData.refreshDisplayNotes();
   }
   $scope.toggleTrash = function() {
@@ -264,12 +267,12 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     nData.refreshDisplayNotes();
   }
   $scope.setSortBy = function(newSort) {
-    nFuncs.setPref('sortBy', newSort);
+    nData.setPref('sortBy', newSort);
     nData.sortDisplayNotes();
   }
 
   $scope.selectNote = function(note) { 
-    nFuncs.setPref('selectedId', note.id);
+    nData.setPref('selectedId', note.id);
     nData.selectNote();
     nServer.getNote(note);              // Checks for updated note on server.
     $mdSidenav('left').close();
@@ -322,14 +325,14 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     console.log('nDB  : ', nDB);
   }   // TESTING
 })
-.controller('searchCtrl', function($location, nData, nFuncs, nSearch) {
+.controller('searchCtrl', function($location, nData, nSearch) {
   
   this.s = nData;
   this.cbFavs = false;
   this.cbTrash = false;
   
   this.selectedItemChange = function(x) {    
-    nFuncs.setPref('selectedId', x.id);
+    nData.setPref('selectedId', x.id);
     nData.selectNote();
     $location.path('/notes');
   }
