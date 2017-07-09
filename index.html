@@ -21,10 +21,13 @@
     <script src="js/lib/angular-messages.min.js"></script>
     <script src="js/lib/angular-route.min.js"></script>
     <script src="js/lib/angular-sanitize.min.js"></script>
+    <script src="js/lib/firebase.js"></script>
+    <script src="js/lib/angularfire.min.js"></script>
      
     <script src="js/main.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/lib/angular-material.min.css">
@@ -176,6 +179,8 @@
           </p>
           
           <ul>
+            <li>Add pipe feature to sort or something</li>
+            <li>Add pipe feature to display note without brs</li>
             <li>leftCtrl Retries Left: {{n.retries}}</li>
             <li>Milliseconds between client and server: {{n.timeDifference}}</li>
             <li>loaded.data: {{loaded.data}}</li>
@@ -184,12 +189,45 @@
             <li>lengthDisplayNotes: {{n.displayNotes.length}}</li>
             <li ng-repeat='note in n.allNotes'>title: {{note.title}}</li>
           </ul>
+
+          <hr>
+          <p>
+            {{testFilter1}}<br>
+            {{testFilter2}}<br>
+          </p>
+          <hr>
+          <p>Test Firebase Object</p>
+          <input type='text' ng-model="gnTestJsObj.text">
+          <p>{{gnTestJsObj.text}}</p>
+
+          <hr>
+          <form ng-submit="firebaseOnSubmit()">
+            <textarea ng-model="gnTestJsObj2.text"></textarea>
+          </form>
+          <p>{{gnTestJsObj2.text | lineBreaks}}</p>
+          <md-card flex>
+            <md-card-content>
+              <p ng-bind-html='gnTestJsObj2.text | lineBreaks'></p>
+            </md-card-content>
+          </md-card>
+
           
         </md-content>
       </section>
     </div>
   </body>
   <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyB3-ANif-JXQRiW4hBPKN4QsStBDhJDqwo",
+      authDomain: "kball17-df.firebaseapp.com",
+      databaseURL: "https://kball17-df.firebaseio.com",
+      projectId: "kball17-df",
+      storageBucket: "kball17-df.appspot.com",
+      messagingSenderId: "88054819590"
+    };
+    firebase.initializeApp(config);
+
     /* ServiceWorker requires https or localhost, not file://... */
     navigator.serviceWorker.register('/sw.js');
   </script>

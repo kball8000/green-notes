@@ -33,6 +33,8 @@ var urlsToCache = [
     '/js/lib/angular-route.min.js.map',
     '/js/lib/angular-sanitize.min.js',
     '/js/lib/angular-sanitize.min.js.map',
+    '/js/lib/firebase.js',
+    '/js/lib/angularfire.min.js',
     '/partials/login.html',
     '/partials/notes.html',
     '/partials/restore.html',

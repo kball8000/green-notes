@@ -1,14 +1,14 @@
 // gae = Google App Engine
 // 2017
 
-var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMessages', 'ngSanitize'])
+var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMaterial', 'ngMessages', 'ngSanitize', 'firebase'])
 .config(function($mdThemingProvider) {
   $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
-  $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
-  
+  $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();  
 })
-.controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
-  
+.controller('mainCtrl', function($firebaseObject, $scope, $mdSidenav, $timeout, $location, $window, nData, 
+nDates, nUtils, nServer, nDB, lineBreaksFilter, lowerBreaksFilter) {
+  // TESTING lineBreaksFilter and lowerBreaksFilter injected into mainCtrl.
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
   $scope.loaded       = {
@@ -223,7 +223,25 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.reload = function() {
     $window.location.reload();
   }
+// **--  FIREBASE TESTING  --**
+  let ref = firebase.database().ref().child("gnTestObj");
+  let ref2 = firebase.database().ref().child("gnTestObj2");
+  console.log('gnTestObj', ref);
+  
 
+  // download the data into a local object
+  let syncObject = $firebaseObject(ref);
+  let syncObject2 = $firebaseObject(ref2);
+  // synchronize the object with a three-way data binding
+  // click on `index.html` above to see it used in the DOM!
+  syncObject.$bindTo($scope, 'gnTestJsObj');
+  syncObject2.$bindTo($scope, "gnTestJsObj2");
+  $scope.firebaseOnSubmit = () => {
+    console.log('runnng firebaseOnSubmit', );
+  }
+  let test = 'testXYZ';   // TESTING
+  $scope.testFilter1 = lineBreaksFilter(test);    // TESTING
+  $scope.testFilter2 = lowerBreaksFilter(test);   // TESTING
 })
 .controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer) {
   $scope.syncing = false;
@@ -257,7 +275,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.close = function() {
     $mdSidenav('left').close();
   }
-  
   $scope.setFavsFilter = function() {
     nData.setPref('showFavs', !nData.userPrefs.showFavs);
     nData.refreshDisplayNotes();
@@ -270,7 +287,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     nData.setPref('sortBy', newSort);
     nData.sortDisplayNotes();
   }
-
   $scope.selectNote = function(note) { 
     nData.setPref('selectedId', note.id);
     nData.selectNote();
@@ -319,7 +335,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
       angular.noop;
     });  
   }
-  
   $scope.logData = function() {
     console.log('nData: ', nData);
     console.log('nDB  : ', nDB);
@@ -364,7 +379,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     nData.updateNote(note.id, note);
     nData.addToQueue([note.id])    
   }
-  
   this.restoreNote = note => {
     updateNote(note);
     nDB._put('allNotes', nData.allNotes);
@@ -375,7 +389,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     nData.restore[interval].notes.forEach( n => updateNote(n.info))
     nDB._put('allNotes', nData.allNotes);
     nServer.save();    
-  } 
+  }
   
   init();
 });
