@@ -178,7 +178,7 @@
             Version: 0.1.29
           </p>
           
-          <ul>
+          <!--<ul>
             <li>Add pipe feature to sort or something</li>
             <li>Add pipe feature to display note without brs</li>
             <li>leftCtrl Retries Left: {{n.retries}}</li>
@@ -188,8 +188,27 @@
             <li>userLoggedIn: {{userLoggedIn}}</li>
             <li>lengthDisplayNotes: {{n.displayNotes.length}}</li>
             <li ng-repeat='note in n.allNotes'>title: {{note.title}}</li>
-          </ul>
+          </ul>-->
 
+          <hr>
+          <p>Test Firebase List</p>
+          <input ng-model='selectedMsg.title' placeholder="title">
+          <input ng-model='selectedMsg.msg' placeholder="content">
+          <!-- <input ng-model='titleInput' placeholder="title">
+          <input ng-model='messageInput' placeholder="content"> -->
+          <br>
+          <button class="btn btn-primary" ng-click='newMessage()'>New</button>
+          <button class="btn btn-primary" ng-click='editMessage(msg)'>Edit</button>
+          <button class="btn btn-primary" ng-click='endEditMessage(msg)'>Done</button>
+          <button class="btn btn-primary" ng-click='logMessages()'>Log</button>
+          <button class="btn btn-primary" ng-click='getRecord()'>Record</button>
+          <ul>
+              <!-- <p ng-bind-html='gnTestJsObj2.text | lineBreaks'></p> -->
+            <li ng-repeat='msg in messages' ng-click="selectMsg(msg)" >
+              <p ng-bind-html="msg.title | phoneNum" ></p>
+              {{msg.msg}} 
+            </li>
+          </ul>
           <hr>
           <p>
             {{testFilter1}}<br>
@@ -197,12 +216,19 @@
           </p>
           <hr>
           <p>Test Firebase Object</p>
+          <input type='text' ng-model="o3.text">
+          <md-button md-class='md-primary' ng-click="saveO3()">Save O3</md-button>
+          <md-button md-class='md-primary' ng-click="o3.$save()">New Save O3</md-button><br>
+          
           <input type='text' ng-model="gnTestJsObj.text">
           <p>{{gnTestJsObj.text}}</p>
 
           <hr>
           <form ng-submit="firebaseOnSubmit()">
             <textarea ng-model="gnTestJsObj2.text"></textarea>
+            <md-button md-class='md-primary' type='submit'>Go</md-button>
+            <md-button md-class='md-primary' type='button' ng-click="logObj(gnTestJsObj)">Log</md-button>
+            <md-button md-class='md-primary' type='button' ng-click="removeObj(gnTestJsObj)">Remove</md-button>
           </form>
           <p>{{gnTestJsObj2.text | lineBreaks}}</p>
           <md-card flex>

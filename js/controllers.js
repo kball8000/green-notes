@@ -6,8 +6,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();  
 })
-.controller('mainCtrl', function($firebaseObject, $scope, $mdSidenav, $timeout, $location, $window, nData, 
-nDates, nUtils, nServer, nDB, lineBreaksFilter, lowerBreaksFilter) {
+.controller('mainCtrl', function($firebaseObject, $firebaseArray, $interval, $scope, $mdSidenav, $timeout, $location, $window, nData, 
+nDates, nUtils, nServer, nDB, lineBreaksFilter, lowerBreaksFilter, phoneNumFilter) {
   // TESTING lineBreaksFilter and lowerBreaksFilter injected into mainCtrl.
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
@@ -223,21 +223,106 @@ nDates, nUtils, nServer, nDB, lineBreaksFilter, lowerBreaksFilter) {
   $scope.reload = function() {
     $window.location.reload();
   }
-// **--  FIREBASE TESTING  --**
+// **--  FIREBASE TESTING ARRAY --**
+  let arrref1 = firebase.database().ref().child("testMessages");
+  $scope.messages = $firebaseArray(arrref1);
+    console.log($scope.messages.length + ', initial messages: ', $scope.messages);
+  let fbData = {
+    msg: null,
+    interval: '',
+    lastMsg: ''
+  }
+
+  // if (!$scope.messages.length) {
+  //   $scope.messages.$add({
+  //     title: 'First Message Title',
+  //     msg: 'First message content',
+  //   });
+  // }
+
+  function saveMsg() {
+    console.log('saving msg: ' + $scope.selectedMsg.title);
+  }
+  $scope.messages = $firebaseArray(arrref1);
+  $scope.newMessage = () => {
+    let newMsg = {
+      title: 'Next Title',
+      msg: 'Next content',
+    };
+    $scope.messages.$add(newMsg);
+    $scope.titleInput = newMsg.title;
+
+    console.log('will create a new message');
+  }
+  $scope.editMessage = msg => {
+    console.log('will begin an interval timer to autosave message: ', msg);
+    fbData.interval = $interval(saveMsg, 2000);
+  }
+  $scope.endEditMessage = msg => {
+    $interval.cancel(fbData.interval);
+    fbData.interval = '';
+    console.log('will stop interval and do one last save for: ', msg);
+  }
+  $scope.selectMsg = msg => {
+    fbData.msg = msg;
+    $scope.selectedMsg = msg;
+    $scope.titleInput = msg.title;
+    $scope.messageInput = msg.msg;
+    console.log('selected message: ', msg);
+  }
+  $scope.getRecord = () => {
+    console.log("getting record");
+    let record = '-KotUBKQo9AKQ1reHOOL';
+    let record1 = '-KotUwQdnz1QJLqGaXif'
+    // let getMsg = $scope.messages.$getRecord(record);
+    let getMsg = $scope.messages.$getRecord(0);
+    console.log('getMsg', getMsg);
+    let k = $scope.messages.$keyAt(record);
+    console.log('keyAt(0): ', k);
+    // arrref1.$getRecord(record);
+    let myMsg = $scope.messages.$getRecord($scope.messages.$keyAt(0));
+    console.log('myMsg, longwinded: ', myMsg);
+    let indexFor = $scope.messages.$indexFor(k);
+    console.log('indexFor given key: ', indexFor);
+  }
+  $scope.logMessages = () => {
+    console.log('messages: ', $scope.messages);
+  }
+
+// **--  FIREBASE TESTING OBJECT --**
   let ref = firebase.database().ref().child("gnTestObj");
   let ref2 = firebase.database().ref().child("gnTestObj2");
-  console.log('gnTestObj', ref);
+  let ref3 = firebase.database().ref().child("gnTestObj3");
+  console.log('gnTestObj-ref', ref);
   
 
   // download the data into a local object
   let syncObject = $firebaseObject(ref);
   let syncObject2 = $firebaseObject(ref2);
+  let syncObject3 = $firebaseObject(ref3);
   // synchronize the object with a three-way data binding
   // click on `index.html` above to see it used in the DOM!
   syncObject.$bindTo($scope, 'gnTestJsObj');
   syncObject2.$bindTo($scope, "gnTestJsObj2");
+  $scope.o3 = syncObject3;
+  $scope.saveO3 = () => {
+    syncObject3.$save();
+  }
+  console.log('gnTestObj-syncObj', syncObject);
   $scope.firebaseOnSubmit = () => {
-    console.log('runnng firebaseOnSubmit', );
+    let title = 'Original Title';
+    syncObject.title = title;
+    syncObject.$save();
+    console.log('runnng firebaseOnSubmit', title);
+  }
+  $scope.logObj = (obj) => {
+    console.log('gnTestObj-removing obj', obj);
+    console.log('syncObject-removing obj', syncObject);
+  }
+  $scope.removeObj = (obj) => {
+    console.log('gnTestObj-removing obj', obj);
+    console.log('syncObject-removing obj', syncObject);
+    syncObject.$remove();
   }
   let test = 'testXYZ';   // TESTING
   $scope.testFilter1 = lineBreaksFilter(test);    // TESTING
