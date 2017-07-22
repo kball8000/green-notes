@@ -2,13 +2,12 @@
 // 2017
 
 var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMessages', 'ngSanitize'])
-.config(function($mdThemingProvider) {
+.config(function($mdGestureProvider, $mdThemingProvider) {
   $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
-  
+  $mdGestureProvider.skipClickHijack();
 })
 .controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
-  
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
   $scope.loaded       = {
