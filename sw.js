@@ -19,6 +19,7 @@ var urlsToCache = [
     '/images/btn_google_signin_dark_pressed_web.png',
     '/js/controllers.js',
     '/js/services.js',
+    '/js/filters.js',
     '/js/main.js',
     '/js/lib/angular.min.js',
     '/js/lib/angular.min.js.map',
