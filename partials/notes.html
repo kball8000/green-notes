@@ -106,7 +106,7 @@
 <!--      DISPLAY / EDIT SELECTED NOTE CONTENT    -->
   <md-card flex ng-hide='editMode'>
     <md-card-content>
-      <p ng-bind-html='n.selectedNote.content'></p>
+      <p ng-bind-html='n.selectedNote.content | caps'></p>
     </md-card-content>
   </md-card>
 

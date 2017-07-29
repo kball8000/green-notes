@@ -15,9 +15,6 @@ var app = angular.module('noteServices', [])
   }
 })
 .service('nUtils', function() {
-  this.replaceBRs = function(text) {
-    return text.replace(/(<br>)/g, '\n');
-  }
   this.replElemString = function(text, elem, newElem) {
     let idx = text.indexOf(elem);
     while(idx !== -1){
@@ -25,9 +22,6 @@ var app = angular.module('noteServices', [])
       idx = text.indexOf(elem);
     }
     return text;
-  }
-  this.replaceBreaks = function(text) {
-    return text.replace(/\n/g, '<br>');
   }
   this.getById = function(list, id) {
     return list.filter( r => {return r.id === id;})[0]
@@ -128,14 +122,12 @@ var app = angular.module('noteServices', [])
         note = nUtils.getById(data.displayNotes, id)
     if (note) {
       data.selectedNote = note;
-      data.notearea = nUtils.replaceBRs(note.content);
     } else {
       if (data.displayNotes.length) {
         note = data.displayNotes[0];
         data.selectedNote = note;
         data.userPrefs.selectedId = note.id;
         nDB._put('userPrefs', data.userPrefs);
-        data.notearea = nUtils.replaceBRs(note.content);
       } else {
         data.selectedNote = {title: '', content: ''};
       }
@@ -188,10 +180,6 @@ var app = angular.module('noteServices', [])
     data.selectedNote.deleted  = 0;
     data.refreshDisplayNotes();        
   }
-  data.saveNotearea = function() {
-    data.selectedNote.content = nUtils.replaceBreaks(data.notearea);
-    data.selectedNote.modified = nDates.getTimestamp();
-  }
   data.selectNote = function() {
     setSelectedNote();
   }
@@ -200,13 +188,7 @@ var app = angular.module('noteServices', [])
   }
   data.updateNote = function(id, newData) {    
     let note = nUtils.getById(data.allNotes, id);
-    
-    angular.forEach(newData, (value, key) => note[key] = value);
-    
-    if (id === data.userPrefs.selectedId) {
-      data.notearea = nUtils.replaceBRs(newData.content);
-    }
-    
+    angular.forEach(newData, (value, key) => note[key] = value);    
     return note;
   }
   data.alertUserIfDuplicateTitle = () => {

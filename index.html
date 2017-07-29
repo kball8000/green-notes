@@ -25,6 +25,7 @@
     <script src="js/main.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/lib/angular-material.min.css">
@@ -167,13 +168,15 @@
                ng-hide='loaded.page' flex>
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
           </div>
-          
+
           <div ng-view ng-show='loaded.page'></div>
-            
+
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
             Version: 0.1.31
           </p>
+
+          <button ng-click='convertNotes()'>Convert</button>
           
           <ul>
             <li>Hi leftCtrl Retries Left: {{n.retries}}</li>

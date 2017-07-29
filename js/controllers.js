@@ -1,7 +1,7 @@
 // gae = Google App Engine
 // 2017
 
-var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMessages', 'ngSanitize'])
+var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMaterial', 'ngMessages', 'ngSanitize'])
 .config(function($mdGestureProvider, $mdThemingProvider) {
   $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
@@ -13,6 +13,17 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
   $scope.loaded       = {
     data: false,
     page: false
+  }
+
+// **--  TESTING FUNCTIONS  --**
+  $scope.convertNotes = () => {
+    nData.allNotes.forEach((value, key) => {
+      value.content = value.content.replace(/\<br\>/g, '\n');
+      value.modified++;
+    })
+    nData.addToQueue(nData.allNotes);
+    nServer.save();
+    nDB._put('allNotes', nData.allNotes);
   }
     
 //  HACK for mobile to get out of edit mode or in put fields.
@@ -79,7 +90,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
       }
       nData.timeouts[db] = '';      
     }
-    nData.saveNotearea();
+    nData.selectedNote.modified = nDates.getTimestamp();
+    nData.selectedNote.content = nData.notearea;
     
     if (db === 'db' || db === 'both') {
       cancelTimeout('db', cancel);
@@ -123,7 +135,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'ngMaterial', 'ngMe
     
     // Toggle from view only to edit mode on screen.
     $scope.editMode = true; 
-    nData.notearea  = nUtils.replaceBRs(note.content);
+    nData.notearea = note.content;
     $timeout(focusTextArea);
   }
   $scope.blurNote = function(caller) {
