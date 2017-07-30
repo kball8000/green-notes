@@ -52,7 +52,6 @@ var app = angular.module('noteServices', [])
   var data = {
     allNotes:       [],
     displayNotes:   [],
-    notearea:       '',
     selectedNote:   {},
     timeouts:       {db: '', server: ''},
     // pending is saves sent to server and awaiting responses.

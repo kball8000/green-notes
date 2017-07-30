@@ -9,9 +9,11 @@
 .headerM {
   margin-bottom: 0.2em;
   font-weight: bold;
-  font-size: 1.3em;
+  font-size: 1.2em;
 }
-
+.headerM:first-of-type {
+  margin-top: 0.1em;
+}
 /* Search Autocomplete */
 .autocomplete-custom-template li {
   border-bottom: 1px solid #ccc;

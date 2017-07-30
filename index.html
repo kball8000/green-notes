@@ -173,16 +173,24 @@
 
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
-            Version: 0.1.32
+            Version: 0.1.33
           </p>
+          <div>
+            <blockquote>
+              Heyo<br>
+              Pretty cool?
+            </blockquote>      
+          </div>
           <hr>
-          <p> Peudo Markdown rules: </p>
+          <p> Pseudo Markdown rules: <code>let j=1;</code> </p>
           <ul>
             <li>'<code>.h1 </code>' - Header</li>
           </ul>
 
           <hr>
           <ul>
+            <li>Selected Title: {{n.selectedNote.title}}</li>
+            <li>Selected Content: {{n.selectedNote.content}}</li>
             <li>Hi leftCtrl Retries Left: {{n.retries}}</li>
             <li>Milliseconds between client and server: {{n.timeDifference}}</li>
             <li>loaded.data: {{loaded.data}}</li>

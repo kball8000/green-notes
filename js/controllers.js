@@ -80,7 +80,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
       nData.timeouts[db] = '';      
     }
     nData.selectedNote.modified = nDates.getTimestamp();
-    nData.selectedNote.content = nData.notearea;
     
     if (db === 'db' || db === 'both') {
       cancelTimeout('db', cancel);
@@ -124,7 +123,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     
     // Toggle from view only to edit mode on screen.
     $scope.editMode = true; 
-    nData.notearea = note.content;
     $timeout(focusTextArea);
   }
   $scope.blurNote = function(caller) {
