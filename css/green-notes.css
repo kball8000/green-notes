@@ -5,6 +5,13 @@
   }
 }
 
+/* Note seudoMarkdown */
+.headerM {
+  margin-bottom: 0.2em;
+  font-weight: bold;
+  font-size: 1.3em;
+}
+
 /* Search Autocomplete */
 .autocomplete-custom-template li {
   border-bottom: 1px solid #ccc;

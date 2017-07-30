@@ -14,17 +14,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     data: false,
     page: false
   }
-
-// **--  TESTING FUNCTIONS  --**
-  $scope.convertNotes = () => {
-    nData.allNotes.forEach((value, key) => {
-      value.content = value.content.replace(/\<br\>/g, '\n');
-      value.modified++;
-    })
-    nData.addToQueue(nData.allNotes);
-    nServer.save();
-    nDB._put('allNotes', nData.allNotes);
-  }
     
 //  HACK for mobile to get out of edit mode or in put fields.
   document.onclick = function(e) {
