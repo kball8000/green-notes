@@ -14,23 +14,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     data: false,
     page: false
   }
-    
-//  HACK for mobile to get out of edit mode or in put fields.
-  document.onclick = function(e) {
-    let arr = ['noteArea', 'noteTitle', 'searchInput'],
-        clickedId = e.target.id,
-        elem;
-    
-    if(!arr.includes(clickedId)) {
-      arr.forEach(testId => {
-        elem = document.getElementById(testId);
-        if(elem) {
-          elem.blur();
-        }
-      })
-    }
-  }  
-    
+
 // **--  LOGIN FUNCTIONS  --**
   $scope.googleLoginImg = 'btn_google_signin_dark_normal_web.png';
   $scope.googleImgChg = function(evt) {
@@ -122,15 +106,59 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nServer.getNote(note);
     
     // Toggle from view only to edit mode on screen.
+    console.log('editNote, turning editmode on');
     $scope.editMode = true; 
     $timeout(focusTextArea);
   }
+
+  // **--  KEYBOARD SHORTCUTS  --**
+  // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
+  // area, not to be confused with formated note in readonly mode.
+  $window.onclick = e => {
+  // $window.document.onclick = e => {
+    // console.log('$window', $window);
+    // console.log('$window.document', $window.document);
+    // console.log('e', e);
+    let edits = {
+      noteTitle:  true,
+      noteArea:   true,
+      doneButton: true,
+      editButton: true,
+      editIcon:   true
+    };
+    console.log('click id: ', e.target.id);
+    if ( !(e.target.id in edits) ) {
+      console.log('exiting edit mode');
+      $scope.editMode = false;    // might need to be blurnote.
+      console.log('$scope.editMode', $scope.editMode);
+      $timeout($scope.digest)
+      
+    } else {
+      console.log('entering / staying in edit mode');      
+    }
+  }
+
+  $window.document.onkeypress = e => {
+    let shortcuts = {
+      101: $scope.editNote,     // e character
+      110: $scope.newNote       // n character
+    };
+    if (e.charCode in shortcuts && $scope.editMode === false) {
+      shortcuts[e.charCode]();
+    }
+  } 
+  $scope.setEditMode = () => {
+    console.log('setEditMode from Title is turning edit mode on');
+    $scope.editMode = true;
+  }
+
   $scope.blurNote = function(caller) {
     
     if (caller === 'title') {
       // leave edit note mode alone...
       nData.alertUserIfDuplicateTitle();
     } else {
+      console.log('blurnote from ', caller, ' is setting edit to false' );
       $scope.editMode = false;
     }
     

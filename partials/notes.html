@@ -12,11 +12,13 @@
           </md-button>
         </div>
         <div flex flex-offset-gt-md='5'>
+                 <!-- ng-keydown='test()' -->
           <input style="border-width:0px; min-height:3em; color:{{titleColor}}" 
                  placeholder="Title of Note"
                  id='noteTitle'
                  ng-model='n.selectedNote.title'
                  ng-blur='blurNote("title")'
+                 ng-click='setEditMode()'
                  ng-disabled='n.userPrefs.noNote'
                  ng-init='titleColor="darkgray"'
                  ng-focus='titleColor="black"'
@@ -40,17 +42,20 @@
 <!--      NOTE BUTTONS EDIT / FAV / DELETE    -->
   <div flex layout='row' layout-align='center center'>
 <!-- Did not merge edit-done button because I had oddites happen with timeout in js-->
+    <!-- <div flex='35' ng-show='!editMode' style='background-color:lightcoral;'> -->
     <div flex='35' ng-show='!editMode'>
       <md-button class='md-icon-button md-raised md-primary'
+                 id='editButton'
                  ng-click='editNote()'
                  ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'>
-        <md-icon>
+        <md-icon id='editButton'>
           edit
         </md-icon>
       </md-button>
     </div>  
     <div flex='35' ng-show='editMode'>
       <md-button class='md-icon-button md-raised md-primary'
+                 id='doneButton'
                  ng-click='blurNote()'
                  ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'>
         <md-icon>
@@ -58,6 +63,7 @@
         </md-icon>
       </md-button>
     </div>  
+    <!-- <div flex='25'></div> -->
     
 <!--
     <div flex='35'>

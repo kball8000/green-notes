@@ -175,22 +175,18 @@
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
             Version: 0.1.33
           </p>
-          <div>
-            <blockquote>
-              Heyo<br>
-              Pretty cool?
-            </blockquote>      
-          </div>
           <hr>
           <p> Pseudo Markdown rules: <code>let j=1;</code> </p>
           <ul>
-            <li>'<code>.h1 </code>' - Header</li>
+            <li>'<code>.h1 </code>' at beginning of line - Header</li>
+            <li><code>__text__</code> - Bold</li>
           </ul>
 
           <hr>
           <ul>
             <li>Selected Title: {{n.selectedNote.title}}</li>
             <li>Selected Content: {{n.selectedNote.content}}</li>
+            <li>Edit Mode: {{editMode}}</li>
             <li>Hi leftCtrl Retries Left: {{n.retries}}</li>
             <li>Milliseconds between client and server: {{n.timeDifference}}</li>
             <li>loaded.data: {{loaded.data}}</li>

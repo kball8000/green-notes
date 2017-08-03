@@ -4,11 +4,12 @@ The way it works is send once, then put in a 'pending queue' for 1 minute. If no
 
 var app = angular.module('noteServices', [])
 .service('nDates', function(){
-  // this.getTimestamp = () => Date.now();  // Code Simplification
+  this.getTimestamp = () => Date.now();  // Code Simplification
 
-  this.getTimestamp = function() {
-    return Date.now();
-  }
+  // Deprecated with code simplification line above.
+  // this.getTimestamp = function() {
+  //   return Date.now();
+  // }
   this.stale = function(timestamp, duration) {
     timestamp = timestamp || 0;
     return Date.now() - timestamp > duration;
