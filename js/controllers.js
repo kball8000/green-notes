@@ -106,7 +106,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nServer.getNote(note);
     
     // Toggle from view only to edit mode on screen.
-    console.log('editNote, turning editmode on');
     $scope.editMode = true; 
     $timeout(focusTextArea);
   }
@@ -116,9 +115,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   // area, not to be confused with formated note in readonly mode.
   $window.onclick = e => {
   // $window.document.onclick = e => {
-    // console.log('$window', $window);
-    // console.log('$window.document', $window.document);
-    // console.log('e', e);
     let edits = {
       noteTitle:  true,
       noteArea:   true,
@@ -126,25 +122,31 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
       editButton: true,
       editIcon:   true
     };
-    console.log('click id: ', e.target.id);
     if ( !(e.target.id in edits) ) {
-      console.log('exiting edit mode');
-      $scope.editMode = false;    // might need to be blurnote.
-      console.log('$scope.editMode', $scope.editMode);
+      $scope.editMode = false;
       $timeout($scope.digest)
-      
-    } else {
-      console.log('entering / staying in edit mode');      
     }
   }
+  // $window.document.onkeyup = e => {
+  //   // console.log('keyup, e.charCode', e);
+  //   console.log('keyup, e.keyCode', e.keyCode);
+  // }
+  // $window.document.onkeypress = e => {
+  //   let shortcuts = {
+  //     101: $scope.editNote,     // e character
+  //     110: $scope.newNote       // n character
+  //   };
 
-  $window.document.onkeypress = e => {
+  $window.document.onkeyup = e => {
+  // $window.onkeyup = e => {
     let shortcuts = {
-      101: $scope.editNote,     // e character
-      110: $scope.newNote       // n character
+      69: $scope.editNote,    // e char to edit note
+      76: $scope.newNote      // n char for new note
     };
-    if (e.charCode in shortcuts && $scope.editMode === false) {
-      shortcuts[e.charCode]();
+    if (e.keyCode in shortcuts && $scope.editMode === false) {
+      shortcuts[e.keyCode]();
+    } else if (e.keyCode === 27 && $scope.editMode === true) {    // Escape key
+      $scope.blurNote();
     }
   } 
   $scope.setEditMode = () => {
@@ -153,12 +155,11 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   }
 
   $scope.blurNote = function(caller) {
-    
+    console.log('running blurnote, caller: ', caller);
     if (caller === 'title') {
       // leave edit note mode alone...
       nData.alertUserIfDuplicateTitle();
     } else {
-      console.log('blurnote from ', caller, ' is setting edit to false' );
       $scope.editMode = false;
     }
     
