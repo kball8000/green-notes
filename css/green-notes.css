@@ -14,6 +14,13 @@
 .headerM:first-of-type {
   margin-top: 0.1em;
 }
+.phoneNumber {
+  font-size: 0.9em;
+  text-decoration: none;
+}
+.links {
+  text-decoration: none;
+}
 /* Search Autocomplete */
 .autocomplete-custom-template li {
   border-bottom: 1px solid #ccc;

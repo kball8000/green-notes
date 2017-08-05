@@ -1,33 +1,27 @@
 // I will be adding fliters for the displayed note for hotlinks to phone numbers 
 // and some super simple markdown style formatting.
 angular.module('nFilters', [])
-.filter('newlines', () => {
-  return input => {
-    input = input || '';
-    return input.replace(/\n/g, '<br>');
-  }
-})
 .filter('markdown', () => {
-  // let markdownOptions = {
-  //   '.h1 ': 'header1',
-  //   '.b ': 'bold1'
-  // };
 
-
-  function formatLine(line) {
-    let syntaxes = {
-      '.h1 ': 'OK, not doing anything here for now.'
+  function formatHeaders(line) {
+    /**
+     * Line that starts with header markdown will be styled accordingly.
+     */
+     if (line.indexOf('.h1 ') !== -1) {
+        line = '<p class="headerM">' + line.slice(4) + '</p>'
+      } else {
+        line += '<br>';
+      }
+      return line;
     }
-    console.log('formatLinefunction');
-    return line;
-  }
-
-  function formatBold(line) {
-
-    // let re = /__/g;
+  function formatLine(line) {
+    /**
+     * Some simple formatting anywhere within the line, i.e. bold and strikethru.
+     */
     let regs = {
       bold1 : {'regex': /__/g, 'replace': '__', beg: '<b>', end: '</b>' },
       bold2 : {'regex': /\*\*/g, 'replace': '**', beg: '<b>', end: '</b>' },
+      bold2 : {'regex': /`/g, 'replace': '`', beg: '<code>', end: '</code>' },
       strike : {'regex': /~~/g, 'replace': '~~', beg: '<strike>', end: '</strike>' }
     }, 
     count = 0, matches = '', r = {};
@@ -42,25 +36,14 @@ angular.module('nFilters', [])
         count = count - 2;        
       } 
     }
-
     return line;
   }
-
-  // Phone Numbers:
-  // let regex = /\(?\d{0,3}[-. )] ?\d{3}[-. ]\d{4}/g;
-  // let regex = /\+?\d{0,3}?[-. (]?\d{0,3}[-. )] ?\d{3}[-. ]\d{4}/g;
-  // regex covers these formats
-  // 299-345-5346
-  // 299.345.5346
-  // (299) 345-5346
-
-  // Proper phone number link, one of these 2:
-  // <a href="tel:+15555551212">555-555-1212</a>
-  // <a href="tel:+1-555-555-1212">555-555-1212</a>
-
   function formatPhoneNum(line){
-
-
+    /**
+     * <a href="tel:+1-555-555-1212">555-555-1212</a>
+     * Creates a telephone link out of phone numbers with reasonable delimeter between the
+     * 'parts', i.e. country code, area code...
+     */
     let regex = /\+?\d{0,3}?[-. (]?\d{0,3}[-. )] ?\d{3}[-. ]\d{4}/g;
     let matches = line.match(regex),
         count, parts, href, anchor, orig, html;
@@ -85,26 +68,48 @@ angular.module('nFilters', [])
         anchor = anchor.replace('+1-', '');
       }
 
-      html = '<a href="tel:' + href + '" style="font-size:0.8em;">' + anchor + '</a>';
+      html = '<a class="phoneNumber" href="tel:' + href + '">' + anchor + '</a>';
+      // html = '<a href="tel:' + href + '>' + anchor + '</a>';
       line = line.replace(orig, html);
       count--;
     } 
-
     return line;
   }
+  function formatUrls(line){
+    /**
+     * <a href="url">anchorText</a>
+     * Creates a link out string, at the moment only 1 per line.
+     */
 
+    let anchorRe  = new RegExp( /\([\w.]+\)/ );
+    let hrefRe    = new RegExp( /\[http[\w:/.?=&;@$+!*'()_-]+\]/ );
+    let regex     = new RegExp(anchorRe.source + hrefRe.source, 'g');
+    let matches   = line.match(regex),
+        count, href, hrefMatch, anchor, anchorMatch, orig, html;
+
+    count = matches ? matches.length : 0;
+    while (count) {
+      orig        = matches[count-1];
+      anchorMatch = orig.match(anchorRe);
+      anchor      = anchorMatch[0].replace(/[()]/g, '');
+      hrefMatch   = orig.match(hrefRe);
+      href        = hrefMatch[0].replace(/\[?\]?/g, '');
+      
+      html = '<a class="links" href="' + href + '">' + anchor + '</a>';
+      line = line.replace(orig, html);
+
+      count--;
+    }
+    return line;
+  }
   return input => {
     input = input || '';
     let lines = input.split('\n'),
         breakLines = lines.map( line => {
-          if (line.indexOf('.h1 ') !== -1) {
-            line = '<p class="headerM">' + line.slice(4) + '</p>'
-          } else {
-            line += '<br>';
-          }
-
-          line = formatBold(line);
+          line = formatHeaders(line);
+          line = formatLine(line);
           line = formatPhoneNum(line);
+          line = formatUrls(line);
           
           return line;
         });
@@ -112,20 +117,3 @@ angular.module('nFilters', [])
     return breakLines.join('');
   }
 });
-/* Example regular expressions*/
-  //OUTPUT: <a href='https://gooogle.com>https://gooogle.com<a>
-  // let l1 =  '<http://google.com?a=34>'
-  // let x = l1.match(/<https?:[a-z./?=0-9]+>/);
-  // let xf = x[0].replace(/<|>/g, '');
-  // $scope.x = '<a href="' + x3f + '">' + x3f + '</a>';
-
-  //<a href='https://gooogle.com>google.com<a>
-  // let l2 = '[google.com](http://google.com?a=34)';
-  // let a2 = l2.match(/\[[a-z.]+\]/g);
-  // let a2f = a2[0].replace(/\[|\]/g, '');
-  // let u2 = l2.match(/\(https?:[a-z./?=0-9]+\)/g);
-  // let u2f = u2[0].replace(/\(|\)/g, '');
-  // $scope.y = '<a href="' + u2f + '">' + a2f + '</a>';
-  
-  
-  // try ^ for initial characters
