@@ -116,4 +116,10 @@ angular.module('nFilters', [])
 
     return breakLines.join('');
   }
-});
+})
+.filter('display', () => {
+  console.log('display notes filter by.');
+  return input => {
+    input = input || '';
+  }
+})
