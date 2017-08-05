@@ -46,6 +46,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   }
     
 // **--  NOTES FUNCTIONS  --**
+  function focusTitle() {
+    let el = $window.document.getElementById('noteTitle');
+    el.focus();
+  }
   function focusTextArea() {
     let el = $window.document.getElementById('noteArea');
     el.focus();
@@ -82,7 +86,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nData.refreshDisplayNotes();
     
     $scope.editMode = true;     // To display textarea.
-    
+    focusTitle();
     saveTo('both');
   }
   $scope.starNote = function() {
@@ -127,21 +131,12 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
       $timeout($scope.digest)
     }
   }
-  // $window.document.onkeyup = e => {
-  //   // console.log('keyup, e.charCode', e);
-  //   console.log('keyup, e.keyCode', e.keyCode);
-  // }
-  // $window.document.onkeypress = e => {
-  //   let shortcuts = {
-  //     101: $scope.editNote,     // e character
-  //     110: $scope.newNote       // n character
-  //   };
 
   $window.document.onkeyup = e => {
-  // $window.onkeyup = e => {
+  // Using keyup so that escape key will work, could not figure it out on keypress.
     let shortcuts = {
       69: $scope.editNote,    // e char to edit note
-      76: $scope.newNote      // n char for new note
+      78: $scope.newNote      // n char for new note
     };
     if (e.keyCode in shortcuts && $scope.editMode === false) {
       shortcuts[e.keyCode]();
@@ -150,12 +145,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     }
   } 
   $scope.setEditMode = () => {
-    console.log('setEditMode from Title is turning edit mode on');
     $scope.editMode = true;
   }
 
   $scope.blurNote = function(caller) {
-    console.log('running blurnote, caller: ', caller);
     if (caller === 'title') {
       // leave edit note mode alone...
       nData.alertUserIfDuplicateTitle();

@@ -16,6 +16,7 @@
           <input style="border-width:0px; min-height:3em; color:{{titleColor}}" 
                  placeholder="Title of Note"
                  id='noteTitle'
+                 tabindex="1"
                  ng-model='n.selectedNote.title'
                  ng-blur='blurNote("title")'
                  ng-click='setEditMode()'
@@ -121,6 +122,7 @@
     <md-input-container flex style='margin:0 10px;'>
       <textarea ng-model='n.selectedNote.content'
                 id='noteArea'
+                tabindex="2"
                 name='notearea'
                 ng-change='noteChg()'
                 ng-blur='blurNote()'
