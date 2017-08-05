@@ -7,13 +7,13 @@ angular.module('nFilters', [])
     /**
      * Line that starts with header markdown will be styled accordingly.
      */
-     if (line.indexOf('.h1 ') !== -1) {
-        line = '<p class="headerM">' + line.slice(4) + '</p>'
-      } else {
-        line += '<br>';
-      }
-      return line;
+    if (line.indexOf('.h1 ') !== -1) {
+       line = '<p class="headerM">' + line.slice(4) + '</p>'
+    } else {
+      line += '<br>';
     }
+    return line;
+  }
   function formatLine(line) {
     /**
      * Some simple formatting anywhere within the line, i.e. bold and strikethru.
@@ -44,7 +44,9 @@ angular.module('nFilters', [])
      * Creates a telephone link out of phone numbers with reasonable delimeter between the
      * 'parts', i.e. country code, area code...
      */
-    let regex = /\+?\d{0,3}?[-. (]?\d{0,3}[-. )] ?\d{3}[-. ]\d{4}/g;
+    // let fourRe = new RegExp( /[-. ]\d{4}/ );
+    // let threeRe = new RegExp( /[-. ) ]?\d{3}/ );
+    let regex = /\+?\d{0,3}?[-.(]?\d{0,3}[-. )] ?\d{3}[-. ]\d{4}/g;
     let matches = line.match(regex),
         count, parts, href, anchor, orig, html;
 
