@@ -10,13 +10,12 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
 .controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
-  $scope.gSortItems = [{d: "title", v: "title"}, {d: "date", v: "modified"}];
   $scope.loaded       = {
     data: false,
     page: false
   }
 
-// **--  LOGIN FUNCTIONS  --**
+  // **--  LOGIN FUNCTIONS  --**
   $scope.googleLoginImg = 'btn_google_signin_dark_normal_web.png';
   $scope.googleImgChg = function(evt) {
     let obj = {
@@ -46,7 +45,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     }
   }
     
-// **--  NOTES FUNCTIONS  --**
+  // **--  NOTES FUNCTIONS  --**
   function focusTitle() {
     let el = $window.document.getElementById('noteTitle');
     el.focus();
@@ -59,7 +58,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
 
     // quirky, if I left this in edit note, caused complete note to toggle, edit note worked fine.
     // hurts my head to think about why that was.
-//    $scope.editMode = true;
+  //    $scope.editMode = true;
   }
   function saveTo(db, cancel) {
     function cancelTimeout(db, cancel) {
@@ -170,7 +169,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     }
   }
   
-// **--  LOADING APP  --**
+  // **--  LOADING APP  --**
   let retries = 25;
   function checkAppReady() {
     if ($scope.loaded.data) {
@@ -236,7 +235,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     $timeout(checkAppReady, 500);
   })
 
-// **--  SIDENAV and ERROR PAGE FUNCTIONS  --**
+  // **--  SIDENAV and ERROR PAGE FUNCTIONS  --**
   $scope.open = function() {
     $mdSidenav('left').open();
   }
@@ -248,6 +247,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
 .controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer) {
   $scope.syncing = false;
   $scope.numShownNotes = 2;
+  $scope.gSortItems = [{d: "title", v: "title"}, {d: "date", v: "modified"}];
+  $scope.gSort = $scope.gSortItems[0];
   $scope.showMoreText = 'More';
   
   nDB.waitFor('loaded', 'leftCtrl').then( retries => {
@@ -291,14 +292,22 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   //   $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
   //   return nData.userPrefs.sortBy;
   // }
+  // gSort4 REMOVE
+  $scope.gSort4 = value => {
+    console.log('gsort3: value', value);
+    nData.setPref('sortBy', value);
+    $scope.reverseNotes = (value === 'modified');
+  }
   $scope.gSort3 = value => {
     console.log('gsort3: value', value);
     nData.setPref('sortBy', value);
     $scope.reverseNotes = (value === 'modified');
   }
+  // setSortBy3 REMOVE
   $scope.setSortBy3 = val => {
     console.log('setSortBy3, val: ', val);
   }
+  // setSortBy2 REMOVE
   $scope.setSortBy2 = function() {
     console.log('$scope.gSort.v', $scope.gSort);
     // nData.setPref('sortBy', $scope.gSort.v);

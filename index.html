@@ -106,16 +106,18 @@
 
                 <md-input-container flex>
                   <label>Sort</label>
+                      <!-- <md-select ng-model='left.userPrefs.sortBy' md-selected-text='gSort4(gSort.v)'>  -->
+                      <md-select ng-model='left.userPrefs.sortBy'>    
                      <!-- <md-select ng-model='left.userPrefs.sortBy' md-selected-text='setSortBy3(gSort.v)'> -->
-                     <md-select ng-model='left.userPrefs.sortBy'>   
                      <!-- <md-select ng-model='left.userPrefs.sortBy' md-selected-text='setSortBy2()'> -->
                   <!-- <md-select ng-model='gSort' md-selected-text='setSortBy2()'> -->
                     <md-option><em>Sort by:</em></md-option>
                                <!-- ng-repeat='gSort in ["title", "modified"]'> -->
                                <!-- ng-repeat='gSort in [{d: "title", v: "title"}, {d: "date", v: "modified"}]'> -->
-                    <md-option ng-value='gSort.d'
-                               ng-click='gSort3(gSort.v)'
-                               ng-repeat='gSort in gSortItems'>
+                                  
+                    <md-option ng-value  =  'gSort.v'
+                               ng-repeat =  'gSort in gSortItems'
+                               ng-click  =  'gSort3(gSort.v)'>
                          {{gSort.d}} 
                     </md-option>
                   </md-select>
