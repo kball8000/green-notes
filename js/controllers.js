@@ -286,6 +286,19 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nData.userPrefs.showTrash = !nData.userPrefs.showTrash;
     nData.refreshDisplayNotes();
   }
+  // $scope.setSortBy2_WORKS = function() {
+  //   nData.setPref('sortBy', nData.userPrefs.sortBy);
+  //   $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
+  //   return nData.userPrefs.sortBy;
+  // }
+  $scope.gSort3 = value => {
+    console.log('gsort3: value', value);
+    nData.setPref('sortBy', value);
+    $scope.reverseNotes = (value === 'modified');
+  }
+  $scope.setSortBy3 = val => {
+    console.log('setSortBy3, val: ', val);
+  }
   $scope.setSortBy2 = function() {
     console.log('$scope.gSort.v', $scope.gSort);
     // nData.setPref('sortBy', $scope.gSort.v);
