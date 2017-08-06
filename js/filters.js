@@ -44,8 +44,6 @@ angular.module('nFilters', [])
      * Creates a telephone link out of phone numbers with reasonable delimeter between the
      * 'parts', i.e. country code, area code...
      */
-    // let fourRe = new RegExp( /[-. ]\d{4}/ );
-    // let threeRe = new RegExp( /[-. ) ]?\d{3}/ );
     let regex = /\+?\d{0,3}?[-.(]?\d{0,3}[-. )] ?\d{3}[-. ]\d{4}/g;
     let matches = line.match(regex),
         count, parts, href, anchor, orig, html;
@@ -79,8 +77,7 @@ angular.module('nFilters', [])
   }
   function formatUrls(line){
     /**
-     * <a href="url">anchorText</a>
-     * Creates a link out string, at the moment only 1 per line.
+     * Creates a link out string, i.e. <a href="url">anchorText</a>
      */
 
     let anchorRe  = new RegExp( /\([\w.]+\)/ );

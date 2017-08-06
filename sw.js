@@ -1,5 +1,5 @@
 // Once done, update the javascript and JQuerygoogle doc.
-var CACHE_NAME = 'green-kball-notes-v0.1.34';
+var CACHE_NAME = 'green-kball-notes-v0.1.35';
 
 // HOW TO HANDLE POST REQUESTS WITH SERVICE WORKER
 

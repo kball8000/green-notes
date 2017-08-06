@@ -383,7 +383,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nData.updateNote(note.id, note);
     nData.addToQueue([note.id])    
   }
-  
   this.restoreNote = note => {
     updateNote(note);
     nDB._put('allNotes', nData.allNotes);
