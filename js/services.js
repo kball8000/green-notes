@@ -93,31 +93,12 @@ var app = angular.module('noteServices', [])
       data.displayNotes = data.displayNotes.filter((n) => { return n.fav });
     } 
   }
-  function sortDisplayNotes() {
-    function sortByTitle(a, b) {
-      if(a.title.toLowerCase() < b.title.toLowerCase()) {
-        return -1;
-      }
-      return 1;
-    }
-    function sortByDate(a, b) {
-      if (a.modified < b.modified) {
-        return 1;
-      }
-      return -1;
-    }
-    
-    if (data.userPrefs.sortBy === 'title') {
-      data.displayNotes.sort(sortByTitle);
-    } else {
-      data.displayNotes.sort(sortByDate);
-    }
-    
-  }
   function isListEmpty() {
     data.userPrefs.noNote = (data.displayNotes.length === 0) ;
   }
   function setSelectedNote() {
+    // In case because of selection, i.e. favorites button selected, the current selected note is 
+    // no longer in the list of displayed notes, fallback to something else.
     let id = data.userPrefs.selectedId,
         note = nUtils.getById(data.displayNotes, id)
     if (note) {
@@ -165,7 +146,6 @@ var app = angular.module('noteServices', [])
     data.displayNotes = data.allNotes;
     hideDeletedNotes();
     filterFavs();
-    sortDisplayNotes();
     setSelectedNote();
     isListEmpty();
   }
@@ -182,9 +162,6 @@ var app = angular.module('noteServices', [])
   }
   data.selectNote = function() {
     setSelectedNote();
-  }
-  data.sortDisplayNotes = function() {
-    sortDisplayNotes();
   }
   data.updateNote = function(id, newData) {    
     let note = nUtils.getById(data.allNotes, id);
@@ -294,7 +271,7 @@ var app = angular.module('noteServices', [])
         max_timeout = retries + 1;
 
     function timeStep() {
-//      With retries of 18, this is minimum 30s
+      // With retries of 18, this is minimum 30s
       return Math.pow((max_timeout - retries),3) + 50;
     }
     

@@ -21,7 +21,7 @@ angular.module('nFilters', [])
     let regs = {
       bold1 : {'regex': /__/g, 'replace': '__', beg: '<b>', end: '</b>' },
       bold2 : {'regex': /\*\*/g, 'replace': '**', beg: '<b>', end: '</b>' },
-      bold2 : {'regex': /`/g, 'replace': '`', beg: '<code>', end: '</code>' },
+      code : {'regex': /`/g, 'replace': '`', beg: '<code>', end: '</code>' },
       strike : {'regex': /~~/g, 'replace': '~~', beg: '<strike>', end: '</strike>' }
     }, 
     count = 0, matches = '', r = {};

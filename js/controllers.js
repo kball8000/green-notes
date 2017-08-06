@@ -157,7 +157,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     }
     
     saveTo('both', true); 
-    nData.sortDisplayNotes();
   }
   $scope.noteChg = function() {
     /*Runs anytime there is a change in the note input field in the app. Sets
@@ -286,11 +285,11 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nData.userPrefs.showTrash = !nData.userPrefs.showTrash;
     nData.refreshDisplayNotes();
   }
-  $scope.setSortBy = function(newSort) {
-    nData.setPref('sortBy', newSort);
-    // nData.sortDisplayNotes();
+  $scope.setSortBy2 = function() {
+    nData.setPref('sortBy', nData.userPrefs.sortBy);
+    $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
+    return nData.userPrefs.sortBy;
   }
-
   $scope.selectNote = function(note) { 
     nData.setPref('selectedId', note.id);
     nData.selectNote();

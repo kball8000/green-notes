@@ -106,16 +106,13 @@
                     </md-icon>
                   </md-button>
                 </div>
-                
+
                 <md-input-container flex>
                   <label>Sort</label>
-                  <md-select ng-model='left.userPrefs.sortBy'>
+                  <md-select ng-model='left.userPrefs.sortBy' md-selected-text='setSortBy2()'>
                     <md-option><em>Sort by:</em></md-option>
-                    <!-- <md-option ng-repeat='s in ["title", "date"]' -->
-                    <md-option ng-repeat='s in ["title", "modified"]'
-                                 ng-click='setSortBy(s)'
-                                 ng-value='s'>
-                        {{s}}
+                    <md-option ng-value='gSort' ng-repeat='gSort in ["title", "modified"]'>
+                        {{gSort}}
                     </md-option>
                   </md-select>
                 </md-input-container>
@@ -127,7 +124,8 @@
                 Create a new Note!
               </p>
               <md-list flex style='padding-top:0;'>
-                <md-list-item ng-repeat='note in left.displayNotes orderBy:s track by note.id'
+                 <md-list-item ng-repeat='note in left.displayNotes | 
+                                          orderBy:left.userPrefs.sortBy:reverseNotes track by note.id' 
                               ng-click='selectNote(note)'
                               class='secondary-button-padding'>
                   {{note.title}}
