@@ -288,7 +288,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   }
   $scope.setSortBy = function(newSort) {
     nData.setPref('sortBy', newSort);
-    nData.sortDisplayNotes();
+    // nData.sortDisplayNotes();
   }
 
   $scope.selectNote = function(note) { 

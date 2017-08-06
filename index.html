@@ -111,7 +111,8 @@
                   <label>Sort</label>
                   <md-select ng-model='left.userPrefs.sortBy'>
                     <md-option><em>Sort by:</em></md-option>
-                    <md-option ng-repeat='s in ["title", "date"]'
+                    <!-- <md-option ng-repeat='s in ["title", "date"]' -->
+                    <md-option ng-repeat='s in ["title", "modified"]'
                                  ng-click='setSortBy(s)'
                                  ng-value='s'>
                         {{s}}
@@ -126,7 +127,7 @@
                 Create a new Note!
               </p>
               <md-list flex style='padding-top:0;'>
-                <md-list-item ng-repeat='note in left.displayNotes track by note.id'
+                <md-list-item ng-repeat='note in left.displayNotes orderBy:s track by note.id'
                               ng-click='selectNote(note)'
                               class='secondary-button-padding'>
                   {{note.title}}
