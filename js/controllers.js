@@ -10,6 +10,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
 .controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
+  $scope.gSortItems = [{d: "title", v: "title"}, {d: "date", v: "modified"}];
   $scope.loaded       = {
     data: false,
     page: false
@@ -286,8 +287,18 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nData.refreshDisplayNotes();
   }
   $scope.setSortBy2 = function() {
+    console.log('$scope.gSort.v', $scope.gSort);
+    // nData.setPref('sortBy', $scope.gSort.v);
+    console.log('nData.userPrefs.sortBy', nData.userPrefs.sortBy);
     nData.setPref('sortBy', nData.userPrefs.sortBy);
+    // $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
     $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
+    // return $scope.gSort.d;
+
+    if ($scope.gSort) {
+      console.log('hi');
+    }
+
     return nData.userPrefs.sortBy;
   }
   $scope.selectNote = function(note) { 
