@@ -12,7 +12,6 @@
           </md-button>
         </div>
         <div flex flex-offset-gt-md='5'>
-                 <!-- ng-keydown='test()' -->
           <input style="border-width:0px; min-height:3em; color:{{titleColor}}" 
                  placeholder="Title of Note"
                  id='noteTitle'
@@ -64,19 +63,7 @@
         </md-icon>
       </md-button>
     </div>  
-    <!-- <div flex='25'></div> -->
     
-<!--
-    <div flex='35'>
-      <md-button class='md-icon-button md-raised md-primary'
-                 ng-click='editMode ? blurNote() : editNote()'
-                 ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'>
-        <md-icon>
-          {{editMode ? 'done' : 'edit' }}
-        </md-icon>
-      </md-button>
-    </div>  
--->
     <div flex='20' 
          style="text-align:center;" 
          ng-hide='n.userPrefs.showTrash'>

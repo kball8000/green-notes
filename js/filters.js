@@ -19,11 +19,11 @@ angular.module('nFilters', [])
      * Some simple formatting anywhere within the line, i.e. bold and strikethru.
      */
     let regs = {
-      bold1 : {'regex': /__/g, 'replace': '__', beg: '<b>', end: '</b>' },
-      bold2 : {'regex': /\*\*/g, 'replace': '**', beg: '<b>', end: '</b>' },
-      bold2 : {'regex': /`/g, 'replace': '`', beg: '<code>', end: '</code>' },
-      strike : {'regex': /~~/g, 'replace': '~~', beg: '<strike>', end: '</strike>' }
-    }, 
+      bold1   : {regex: /__/g, 'replace': '__', beg: '<b>', end: '</b>'},
+      bold2   : {regex: /\*\*/g, 'replace': '**', beg: '<b>', end: '</b>'},
+      code    : {regex: /`/g, 'replace': '`', beg: '<code>', end: '</code>'},
+      strike  : {regex: /~~/g, 'replace': '~~', beg: '<strike>', end: '</strike>'}
+    },
     count = 0, matches = '', r = {};
 
     for (style in regs) {
@@ -44,9 +44,7 @@ angular.module('nFilters', [])
      * Creates a telephone link out of phone numbers with reasonable delimeter between the
      * 'parts', i.e. country code, area code...
      */
-    // let fourRe = new RegExp( /[-. ]\d{4}/ );
-    // let threeRe = new RegExp( /[-. ) ]?\d{3}/ );
-    let regex = /\+?\d{0,3}?[-.(]?\d{0,3}[-. )] ?\d{3}[-. ]\d{4}/g;
+    let regex = /\+?\d{0,3}?[-.(]?\d{3}[-. )] ?\d{3}[-. ]\d{4}/g;
     let matches = line.match(regex),
         count, parts, href, anchor, orig, html;
 
