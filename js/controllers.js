@@ -113,6 +113,30 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     $scope.editMode = true; 
     $timeout(focusTextArea);
   }
+  $scope.talkInput = () => {
+    console.log('will convert speech to text.');
+    let recognition = new webkitSpeechRecognition();
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.lang = "en-US";
+    recognition.start();
+
+    recognition.onresult = e => {
+      console.log('text onresult e: ', e);
+      $scope.outText = e.results[0][0].transcript;
+      recognition.stop();
+    };
+
+    recognition.onerror = e => {
+      console.log('text onerror e: ', e);
+      recognition.stop();
+    }
+
+
+
+  }
 
   // **--  KEYBOARD SHORTCUTS  --**
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
@@ -287,41 +311,9 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     nData.userPrefs.showTrash = !nData.userPrefs.showTrash;
     nData.refreshDisplayNotes();
   }
-  // $scope.setSortBy2_WORKS = function() {
-  //   nData.setPref('sortBy', nData.userPrefs.sortBy);
-  //   $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
-  //   return nData.userPrefs.sortBy;
-  // }
-  // gSort4 REMOVE
-  $scope.gSort4 = value => {
-    console.log('gsort3: value', value);
-    nData.setPref('sortBy', value);
-    $scope.reverseNotes = (value === 'modified');
-  }
   $scope.gSort3 = value => {
-    console.log('gsort3: value', value);
     nData.setPref('sortBy', value);
     $scope.reverseNotes = (value === 'modified');
-  }
-  // setSortBy3 REMOVE
-  $scope.setSortBy3 = val => {
-    console.log('setSortBy3, val: ', val);
-  }
-  // setSortBy2 REMOVE
-  $scope.setSortBy2 = function() {
-    console.log('$scope.gSort.v', $scope.gSort);
-    // nData.setPref('sortBy', $scope.gSort.v);
-    console.log('nData.userPrefs.sortBy', nData.userPrefs.sortBy);
-    nData.setPref('sortBy', nData.userPrefs.sortBy);
-    // $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
-    $scope.reverseNotes = (nData.userPrefs.sortBy === 'modified');
-    // return $scope.gSort.d;
-
-    if ($scope.gSort) {
-      console.log('hi');
-    }
-
-    return nData.userPrefs.sortBy;
   }
   $scope.selectNote = function(note) { 
     nData.setPref('selectedId', note.id);

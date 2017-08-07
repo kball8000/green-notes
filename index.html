@@ -106,18 +106,11 @@
 
                 <md-input-container flex>
                   <label>Sort</label>
-                      <!-- <md-select ng-model='left.userPrefs.sortBy' md-selected-text='gSort4(gSort.v)'>  -->
                       <md-select ng-model='left.userPrefs.sortBy'>    
-                     <!-- <md-select ng-model='left.userPrefs.sortBy' md-selected-text='setSortBy3(gSort.v)'> -->
-                     <!-- <md-select ng-model='left.userPrefs.sortBy' md-selected-text='setSortBy2()'> -->
-                  <!-- <md-select ng-model='gSort' md-selected-text='setSortBy2()'> -->
                     <md-option><em>Sort by:</em></md-option>
-                               <!-- ng-repeat='gSort in ["title", "modified"]'> -->
-                               <!-- ng-repeat='gSort in [{d: "title", v: "title"}, {d: "date", v: "modified"}]'> -->
-                                  
-                    <md-option ng-value  =  'gSort.v'
-                               ng-repeat =  'gSort in gSortItems'
-                               ng-click  =  'gSort3(gSort.v)'>
+                    <md-option ng-value  = 'gSort.v'
+                               ng-repeat = 'gSort in gSortItems'
+                               ng-click  = 'gSort3(gSort.v)'>
                          {{gSort.d}} 
                     </md-option>
                   </md-select>
@@ -130,8 +123,6 @@
                 Create a new Note!
               </p>
               <md-list flex style='padding-top:0;'>
-                 <!-- orderBy:left.userPrefs.sortBy:reverseNotes track by note.id' -->
-                <!-- orderBy:gSort.v:reverseNotes track by note.id'  -->
                  <md-list-item ng-repeat='note in left.displayNotes | 
                                           orderBy:left.userPrefs.sortBy:reverseNotes track by note.id'
                               ng-click='selectNote(note)'
@@ -188,7 +179,8 @@
           <ul>
             <li>'<code>.h1 </code>' at beginning of line - Header</li>
             <li><code>__text__</code> or <code>**text**</code> - Bold</li>
-            <li><code>`code`</code> - for inline code, no block code available currently</li>
+            <li><code>`code`</code> (backtick) - for inline code, no block code available currently</li>
+            <li><code>~~text~~</code> (tilde) - for strikethru text</li>
             <li>Reasonable phone number formats</li>
             <li>Links in (anchor text)[url] format</li>
           </ul>
@@ -199,6 +191,7 @@
             <li>'<code>Esc</code>' - Done editing note</li>
           </ul>
 
+          <!--***  DEBUG CODE  ***-->
           <!-- <hr>
           <ul>
             <li>Selected Title: {{n.selectedNote.title}}</li>
