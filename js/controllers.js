@@ -10,6 +10,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
 .controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
+  $scope.userTalking  = false;
   $scope.loaded       = {
     data: false,
     page: false
@@ -58,7 +59,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
 
     // quirky, if I left this in edit note, caused complete note to toggle, edit note worked fine.
     // hurts my head to think about why that was.
-  //    $scope.editMode = true;
+    //    $scope.editMode = true;
   }
   function saveTo(db, cancel) {
     function cancelTimeout(db, cancel) {
@@ -122,16 +123,20 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
 
     recognition.lang = "en-US";
     recognition.start();
+    $scope.userTalking  = true;
 
     recognition.onresult = e => {
       console.log('text onresult e: ', e);
       $scope.outText = e.results[0][0].transcript;
       recognition.stop();
-    };
+      $scope.userTalking = false;
+      $timeout($scope.apply);
+      };
 
     recognition.onerror = e => {
       console.log('text onerror e: ', e);
       recognition.stop();
+      $scope.userTalking = false;
     }
 
 
@@ -368,6 +373,16 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     console.log('nData: ', nData);
     console.log('nDB  : ', nDB);
   }   // TESTING
+
+  function leftInit() {
+    // Set reverse value on note list sorting on sidenav on load.
+    nDB.waitFor('loaded').then( () => {
+      $scope.reverseNotes = nData.userPrefs.sortBy === 'modified';
+    })
+  }
+
+  leftInit();
+
 })
 .controller('searchCtrl', function($location, nData, nSearch) {
   

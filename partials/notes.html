@@ -68,7 +68,7 @@
                  ng-click='talkInput()'
                  ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'>
         <md-icon>
-          microphone
+          {{(userTalking) ? 'mic_none' : 'mic'}}
         </md-icon>
       </md-button>
     </div>  
