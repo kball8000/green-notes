@@ -54,8 +54,9 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   function focusTextArea() {
     let el = $window.document.getElementById('noteArea');
     el.focus();
-    el.selectionStart = 0;
-    el.selectionEnd = 0;
+    let cursor = nData.selectedNote.cursorLocation || 0;
+    el.selectionStart = cursor;
+    el.selectionEnd = cursor;
 
     // quirky, if I left this in edit note, caused complete note to toggle, edit note worked fine.
     // hurts my head to think about why that was.
@@ -79,6 +80,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
       nData.addToQueue([nData.selectedNote.id]);
       nServer.save();
     }
+  }
+  function saveCursorLocation() {
+    let el = $window.document.getElementById('noteArea');
+    nData.selectedNote.cursorLocation = el.selectionStart || 0;    
   }
   $scope.newNote = function(){
     let newNote = nData.createNoteObj();
@@ -138,16 +143,13 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
       recognition.stop();
       $scope.userTalking = false;
     }
-
-
-
   }
 
   // **--  KEYBOARD SHORTCUTS  --**
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
   // area, not to be confused with formated note in readonly mode.
   $window.onclick = e => {
-  // $window.document.onclick = e => {
+    // $window.document.onclick = e => {
     let edits = {
       noteTitle:  true,
       noteArea:   true,
@@ -160,9 +162,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
       $timeout($scope.digest)
     }
   }
-
   $window.document.onkeyup = e => {
-  // Using keyup so that escape key will work, could not figure it out on keypress.
+    // Using keyup so that escape key will work, could not figure it out on keypress.
     let shortcuts = {
       69: $scope.editNote,    // e char to edit note
       78: $scope.newNote      // n char for new note
@@ -182,6 +183,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
       // leave edit note mode alone...
       nData.alertUserIfDuplicateTitle();
     } else {
+      saveCursorLocation();
       $scope.editMode = false;
     }
     

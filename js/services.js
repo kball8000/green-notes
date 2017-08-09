@@ -59,6 +59,7 @@ var app = angular.module('noteServices', [])
     pendingQueue:   [],
     retries:        0,    // TESTING
     serverQueue:    [],
+    cursorLocation: 0,
     serverOffset:   0,
     timeDifference: 0,    // TESTING
     userPrefs:      {}
