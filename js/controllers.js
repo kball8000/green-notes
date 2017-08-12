@@ -1,7 +1,7 @@
 // gae = Google App Engine
 // 2017
 
-var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMaterial', 'ngMessages', 'ngSanitize'])
+var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnimate', 'ngMaterial', 'ngMessages', 'ngSanitize'])
 .config(function($mdGestureProvider, $mdThemingProvider) {
   $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
@@ -11,6 +11,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
   $scope.editMode     = false;
   $scope.userLoggedIn = false;
   $scope.userTalking  = false;
+  $scope.translation = false;
   $scope.loaded       = {
     data: false,
     page: false
@@ -120,29 +121,38 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngMate
     $timeout(focusTextArea);
   }
   $scope.talkInput = () => {
-    console.log('will convert speech to text.');
     let recognition = new webkitSpeechRecognition();
 
     recognition.continuous = false;
     recognition.interimResults = false;
-
     recognition.lang = "en-US";
+
     recognition.start();
     $scope.userTalking  = true;
+    $scope.translation  = true;
 
     recognition.onresult = e => {
-      console.log('text onresult e: ', e);
-      $scope.outText = e.results[0][0].transcript;
+      $scope.translatedText = e.results[0][0].transcript;
       recognition.stop();
       $scope.userTalking = false;
-      $timeout($scope.apply);
-      };
+      $scope.apply();
+    };
 
     recognition.onerror = e => {
-      console.log('text onerror e: ', e);
       recognition.stop();
       $scope.userTalking = false;
+      $scope.translation  = true;
     }
+  }
+  $scope.acceptTranslation = () => {
+    $scope.translation  = true;
+    console.log('will accept translation: ', $scope.translatedText);
+    $scope.translatedText = '';
+  }
+  $scope.rejectTranslation = () => {
+    $scope.translation  = true;
+    $scope.translatedText = '';
+    console.log('will reject translation: ', $scope.translatedText);
   }
 
   // **--  KEYBOARD SHORTCUTS  --**

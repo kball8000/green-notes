@@ -105,7 +105,35 @@
     </div>
   </div>
 
-        
+  <!-- <div flex layout='row' layout-align='center center'> -->
+  <!-- Area shows when user is talking to app -->
+  <div flex layout='row' ng-show="translation">
+    <p>
+      {{translatedText}}
+    </p>
+    <div flex='20' 
+         style="text-align:center;">
+      <md-button class='md-icon-button md-primary'
+                 ng-click='acceptTranslation()'
+                 ng-disabled='userTalking'>
+        <md-icon>
+          check_circle
+        </md-icon>
+      </md-button>
+    </div>
+    <div flex='20' 
+         style="text-align:center;">
+      <md-button class='md-icon-button md-primary'
+                 ng-click='rejectTranslation()'
+                 ng-disabled='userTalking'>
+        <md-icon>
+          cancel
+        </md-icon>
+      </md-button>
+    </div>
+    
+
+  </div>
   <!--      DISPLAY / EDIT SELECTED NOTE CONTENT    -->
   <md-card flex ng-hide='editMode'>
     <md-card-content>
