@@ -103,14 +103,27 @@
                     </md-icon>
                   </md-button>
                 </div>
-
+                <!-- <md-input-container>
+                    <md-select ng-model="someModel">
+                      <md-select-header>
+                        <span> Neighborhoods - </span>
+                      </md-select-header>
+                      <md-option ng-value="opt" ng-repeat="opt in neighborhoods2">{{ opt }}</md-option>
+                    </md-select>
+                  </md-input-container> -->
                 <md-input-container flex>
-                  <label>Sort</label>
-                      <md-select ng-model='left.userPrefs.sortBy'>    
-                    <md-option><em>Sort by:</em></md-option>
-                    <md-option ng-value  = 'gSort.v'
+                  <!-- <label>Sort</label> -->
+                  <!-- <md-select  >
+                  </md-select> -->
+                      <md-select ng-model='left.userPrefs.sortBy' 
+                                 ng-model-options="{trackBy: '$value.v'}"
+                                 aria-label="sortOptions">
+                        <!-- <md-select ng-model='left.tSort'> -->
+                            <md-option><em>Sort byte:</em></md-option>
+                            <!-- <md-option ng-value  = 'gSort.v' -->
+                            <md-option ng-value  = 'gSort'
                                ng-repeat = 'gSort in gSortItems'
-                               ng-click  = 'gSort3(gSort.v)'>
+                               ng-click  = 'gSort3(gSort)'>
                          {{gSort.d}} 
                     </md-option>
                   </md-select>
@@ -124,7 +137,7 @@
               </p>
               <md-list flex style='padding-top:0;'>
                  <md-list-item ng-repeat='note in left.displayNotes | 
-                                          orderBy:left.userPrefs.sortBy:reverseNotes track by note.id'
+                                          orderBy:left.userPrefs.sortBy.v:reverseNotes track by note.id'
                               ng-click='selectNote(note)'
                               class='secondary-button-padding'>
                   {{note.title}}
@@ -175,6 +188,7 @@
             Version: 0.1.361
           </p>
           <ul>
+            <li>sortBy: {{n.userPrefs.sortBy}}</li>
             <li>userTalking: {{userTalking}}</li>
           </ul>
           <hr>
@@ -189,7 +203,7 @@
           </ul>
           <p> Keyboard Shortcuts </p>
           <ul>
-            <li>'<code>e</code>' - Edit note</li>
+            <li>'<code>e</code>' - Edit note [temp test]</li>
             <li>'<code>n</code>' - Create new note</li>
             <li>'<code>Esc</code>' - Done editing note</li>
           </ul>

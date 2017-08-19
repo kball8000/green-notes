@@ -288,8 +288,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
 .controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer) {
   $scope.syncing = false;
   $scope.numShownNotes = 2;
-  $scope.gSortItems = [{d: "title", v: "title"}, {d: "date", v: "modified"}];
-  $scope.gSort = $scope.gSortItems[0];
+  $scope.gSortItems = [{d: "Title", v: "title"}, {d: "Date", v: "modified"}];
+  $scope.tSort = {d: "Title", v: "title"};
+  // $scope.tSort = {d: "Date", v: "modified"};
+  // $scope.gSort = $scope.gSortItems[0];
   $scope.showMoreText = 'More';
   
   nDB.waitFor('loaded', 'leftCtrl').then( retries => {
@@ -329,8 +331,17 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     nData.refreshDisplayNotes();
   }
   $scope.gSort3 = value => {
+    console.log('gsort3, value: ', value);
+    if ('$$hashKey' in value) {
+      console.log('$$hashKey exists');
+      delete value.$$hashKey;
+      delete value.$$mdSelectId;
+      console.log('gsort3, value w/o hashkey: ', value);
+    }
     nData.setPref('sortBy', value);
-    $scope.reverseNotes = (value === 'modified');
+    // $scope.reverseNotes = (value.v === 'modified');
+    $scope.reverseNotes = true;
+    console.log('reversing sort: ', $scope.reverseNotes);
   }
   $scope.selectNote = function(note) { 
     nData.setPref('selectedId', note.id);
@@ -380,7 +391,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       angular.noop;
     });  
   }
-  
   $scope.logData = function() {
     console.log('nData: ', nData);
     console.log('nDB  : ', nDB);
@@ -389,7 +399,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   function leftInit() {
     // Set reverse value on note list sorting on sidenav on load.
     nDB.waitFor('loaded').then( () => {
-      $scope.reverseNotes = nData.userPrefs.sortBy === 'modified';
+      nData.userPrefs.sortBy  = nData.userPrefs.sortBy || {d: 'Date', v: 'modified'};
+      $scope.reverseNotes     = nData.userPrefs.sortBy.v === 'modified';
+      console.log('reverse onload: ', $scope.reverseNotes, ', sortBy: ', nData.userPrefs.sortBy);
+      // $scope.gSort3(nData.userPrefs.sortBy);
     })
   }
 

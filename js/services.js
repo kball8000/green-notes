@@ -124,8 +124,17 @@ var app = angular.module('noteServices', [])
   
 //  Shared functions to controllers
   data.setPref = (key, value) => {
+    console.log('setting key: ', key, ', value: ', value);
+    console.log('before data.userPrefs.sortBy: ', data.userPrefs.sortBy);
     data.userPrefs[key] = value;
-    nDB._put('userPrefs', data.userPrefs);
+    console.log('after data.userPrefs.sortBy: ', data.userPrefs.sortBy);
+    let rslt = nDB._put('userPrefs', data.userPrefs);
+    console.log('result: ', rslt);
+    rslt.then(r => {
+      console.log('succeeded to save: ', r);
+    }, e => {
+      console.log('failed to save: ', e); 
+    })
   }
   data.createNoteObj = function(id) {
     let timestamp = nDates.getTimestamp();
