@@ -288,16 +288,22 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
 .controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer) {
   $scope.syncing = false;
   $scope.numShownNotes = 2;
-  $scope.gSortItems = [{d: "Title", v: "title"}, {d: "Date", v: "modified"}];
-  $scope.tSort = {d: "Title", v: "title"};
-  // $scope.tSort = {d: "Date", v: "modified"};
-  // $scope.gSort = $scope.gSortItems[0];
+  $scope.sortOptions = [
+    {display: "Title", value: "title"}, 
+    {display: "Date",  value: "modified"}
+  ];
   $scope.showMoreText = 'More';
   
   nDB.waitFor('loaded', 'leftCtrl').then( retries => {
     nData.retries = retries;    // TESTING
+
+    // for html
     $scope.left = nData;
-  }, error => {    
+
+    // for sort ng-select in LH Nav.
+    nData.userPrefs.sortBy  = nData.userPrefs.sortBy || {display: 'Date', value: 'modified'};
+    $scope.reverseNotes     = nData.userPrefs.sortBy.value === 'modified';
+}, error => {    
     nData.retries = error;    // TESTING
     
     var confirm = $mdDialog.confirm()
@@ -320,8 +326,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   }
   $scope.close = function() {
     $mdSidenav('left').close();
-  }
-  
+  }  
   $scope.setFavsFilter = function() {
     nData.setPref('showFavs', !nData.userPrefs.showFavs);
     nData.refreshDisplayNotes();
@@ -330,18 +335,11 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     nData.userPrefs.showTrash = !nData.userPrefs.showTrash;
     nData.refreshDisplayNotes();
   }
-  $scope.gSort3 = value => {
-    console.log('gsort3, value: ', value);
-    if ('$$hashKey' in value) {
-      console.log('$$hashKey exists');
-      delete value.$$hashKey;
-      delete value.$$mdSelectId;
-      console.log('gsort3, value w/o hashkey: ', value);
-    }
-    nData.setPref('sortBy', value);
-    // $scope.reverseNotes = (value.v === 'modified');
-    $scope.reverseNotes = true;
-    console.log('reversing sort: ', $scope.reverseNotes);
+  $scope.nSort = option => {
+    // Create my own object to avoid possible async issues and keeping angular $$ type properties.
+    let obj = {value: option.value, display: option.display}
+    nData.setPref('sortBy', obj);
+    $scope.reverseNotes = (option.display === 'Date');
   }
   $scope.selectNote = function(note) { 
     nData.setPref('selectedId', note.id);
@@ -395,19 +393,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     console.log('nData: ', nData);
     console.log('nDB  : ', nDB);
   }   // TESTING
-
-  function leftInit() {
-    // Set reverse value on note list sorting on sidenav on load.
-    nDB.waitFor('loaded').then( () => {
-      nData.userPrefs.sortBy  = nData.userPrefs.sortBy || {d: 'Date', v: 'modified'};
-      $scope.reverseNotes     = nData.userPrefs.sortBy.v === 'modified';
-      console.log('reverse onload: ', $scope.reverseNotes, ', sortBy: ', nData.userPrefs.sortBy);
-      // $scope.gSort3(nData.userPrefs.sortBy);
-    })
-  }
-
-  leftInit();
-
 })
 .controller('searchCtrl', function($location, nData, nSearch) {
   

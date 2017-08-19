@@ -79,7 +79,7 @@
               </div>
             </md-toolbar>
             
-<!--        SIDENAV CONTENT    -->
+            <!--        SIDENAV CONTENT    -->
             <md-content layout-padding style='padding-top:0;' 
                         ng-show='userLoggedIn'>
               <div layout='row' 
@@ -103,28 +103,15 @@
                     </md-icon>
                   </md-button>
                 </div>
-                <!-- <md-input-container>
-                    <md-select ng-model="someModel">
-                      <md-select-header>
-                        <span> Neighborhoods - </span>
-                      </md-select-header>
-                      <md-option ng-value="opt" ng-repeat="opt in neighborhoods2">{{ opt }}</md-option>
-                    </md-select>
-                  </md-input-container> -->
                 <md-input-container flex>
-                  <!-- <label>Sort</label> -->
-                  <!-- <md-select  >
-                  </md-select> -->
-                      <md-select ng-model='left.userPrefs.sortBy' 
-                                 ng-model-options="{trackBy: '$value.v'}"
-                                 aria-label="sortOptions">
-                        <!-- <md-select ng-model='left.tSort'> -->
-                            <md-option><em>Sort byte:</em></md-option>
-                            <!-- <md-option ng-value  = 'gSort.v' -->
-                            <md-option ng-value  = 'gSort'
-                               ng-repeat = 'gSort in gSortItems'
-                               ng-click  = 'gSort3(gSort)'>
-                         {{gSort.d}} 
+                  <label>Sort</label>
+                  <md-select ng-model='left.userPrefs.sortBy' 
+                              ng-model-options="{trackBy: '$value.value'}"
+                              aria-label="sortOptions">
+                    <md-option ng-value  = 'sortBy'
+                        ng-repeat = 'sortBy in sortOptions'
+                        ng-click  = 'nSort(sortBy)'>
+                      {{sortBy.display}} 
                     </md-option>
                   </md-select>
                 </md-input-container>
@@ -137,7 +124,7 @@
               </p>
               <md-list flex style='padding-top:0;'>
                  <md-list-item ng-repeat='note in left.displayNotes | 
-                                          orderBy:left.userPrefs.sortBy.v:reverseNotes track by note.id'
+                                          orderBy:left.userPrefs.sortBy.value:reverseNotes track by note.id'
                               ng-click='selectNote(note)'
                               class='secondary-button-padding'>
                   {{note.title}}
