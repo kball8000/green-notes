@@ -42,7 +42,7 @@
   <!--      NOTE BUTTONS EDIT / FAV / DELETE    -->
   <div flex layout='row' layout-align='center center'>
   <!-- Did not merge edit-done button because I had oddites happen with timeout in js-->
-    <div flex='35' ng-show='!editMode'>
+    <div flex='25' ng-show='!editMode'>
       <md-button class='md-icon-button md-raised md-primary'
                  id='editButton'
                  ng-click='editNote()'
@@ -52,7 +52,7 @@
         </md-icon>
       </md-button>
     </div>  
-    <div flex='20' ng-show='editMode'>
+    <div flex='25' ng-show='editMode'>
       <md-button class='md-icon-button md-raised md-primary'
                  id='doneButton'
                  ng-click='blurNote()'
@@ -72,7 +72,6 @@
         </md-icon>
       </md-button>
     </div>  
-    
     <div flex='20' 
          style="text-align:center;" 
          ng-hide='n.userPrefs.showTrash'>
@@ -105,35 +104,48 @@
     </div>
   </div>
 
-  <!-- <div flex layout='row' layout-align='center center'> -->
-  <!-- Area shows when user is talking to app -->
-  <div flex layout='row' ng-show="translation">
-    <p>
-      {{translatedText}}
-    </p>
-    <div flex='20' 
-         style="text-align:center;">
-      <md-button class='md-icon-button md-primary'
-                 ng-click='acceptTranslation()'
-                 ng-disabled='userTalking'>
-        <md-icon>
-          check_circle
-        </md-icon>
-      </md-button>
+  <!-- SPEECH to TEXT Box -->
+  <md-card flex ng-show='n.speech.translationBox' style='padding-top:0px'>
+      <md-card-content>
+          <div flex layout='row' layout-align='center center' style='margin-bottom:2em;'>
+      <div flex='90'> 
+        {{n.speech.translatedText || n.speech.listeningMsg || n.speech.errorMsg}}
+      </div>
+      <div flex='10'> 
+        <md-button class='md-icon-button md-primary'
+        ng-click='closeTranslation()'>
+          <md-icon>
+            close
+          </md-icon>
+        </md-button>
+      </div>
     </div>
-    <div flex='20' 
-         style="text-align:center;">
-      <md-button class='md-icon-button md-primary'
-                 ng-click='rejectTranslation()'
-                 ng-disabled='userTalking'>
-        <md-icon>
-          cancel
-        </md-icon>
-      </md-button>
+    <div flex layout='row'>
+      <div flex='50'> </div>
+      <div flex='15' >
+        <md-button class='md-icon-button md-primary'
+                  ng-click='acceptTranslation()'
+                  ng-disabled='n.speech.userTalking || n.speech.errorMsg'>
+          <md-icon>
+            check_circle
+          </md-icon>
+        </md-button>
+      </div>
+      <div flex='15' 
+          style="text-align:center;">
+        <md-button class='md-icon-button md-primary'
+                  ng-click='retryTranslation()'
+                  ng-disabled='n.speech.userTalking'>
+          <md-icon>
+            refresh
+          </md-icon>
+        </md-button>
+      </div>
     </div>
-    
+    </md-card-content>
+  </md-card>
 
-  </div>
+
   <!--      DISPLAY / EDIT SELECTED NOTE CONTENT    -->
   <md-card flex ng-hide='editMode'>
     <md-card-content>

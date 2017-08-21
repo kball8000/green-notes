@@ -1,18 +1,18 @@
 // gae = Google App Engine
 // 2017
 
-var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnimate', 'ngMaterial', 'ngMessages', 'ngSanitize'])
+var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnimate', 'ngMaterial', 'ngMessages', 'ngSanitize', 'nSpeech'])
 .config(function($mdGestureProvider, $mdThemingProvider) {
   $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
   $mdGestureProvider.skipClickHijack();
 })
 .controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
-  $scope.editMode     = false;
-  $scope.userLoggedIn = false;
-  $scope.userTalking  = false;
-  $scope.translation = false;
-  $scope.loaded       = {
+  $scope.editMode       = false;
+  $scope.userLoggedIn   = false;
+  // $scope.userTalking    = false;
+  // $scope.translationBox = false;
+  $scope.loaded         = {
     data: false,
     page: false
   }
@@ -46,7 +46,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       });
     }
   }
-    
+   
   // **--  NOTES FUNCTIONS  --**
   function focusTitle() {
     let el = $window.document.getElementById('noteTitle');
@@ -120,40 +120,70 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     $scope.editMode = true; 
     $timeout(focusTextArea);
   }
+
+  // Speech to Text
   $scope.talkInput = () => {
-    let recognition = new webkitSpeechRecognition();
 
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
+    function blar() {
+      $scope.userTalking  = false;
+      $scope.translatedText = 'Hey O!';
+    }   // TESTING
 
-    recognition.start();
-    $scope.userTalking  = true;
-    $scope.translation  = true;
+    // let recognition = new webkitSpeechRecognition();
+    nData.speech.recognition = new webkitSpeechRecognition();
+    
+    nData.speech.recognition.continuous = false;
+    nData.speech.recognition.interimResults = false;
+    nData.speech.recognition.lang = "en-US";
 
-    recognition.onresult = e => {
-      $scope.translatedText = e.results[0][0].transcript;
-      recognition.stop();
-      $scope.userTalking = false;
+    // recognition.start();
+    nData.speech.userTalking    = true;
+    nData.speech.translationBox = true;
+    nData.speech.translatedText = '';
+    nData.speech.errorMsg       = '';
+    nSpeech.startListeningAnimation();
+    console.log('start listening to user.');    // TESTING
+    $timeout(blar, 2000);                       // TESTING
+
+    nData.recognition.onresult = e => {
+      nData.speech.translatedText = e.results[0][0].transcript;
+      nData.speech.userTalking    = false;    // updates UI
+      nData.speech.recognition.stop();
       $scope.apply();
     };
-
-    recognition.onerror = e => {
-      recognition.stop();
-      $scope.userTalking = false;
-      $scope.translation  = true;
+    nData.recognition.onerror = e => {
+      nData.speech.recognition.stop();
+      nData.speech.userTalking  = false;    // updates UI
+      nData.speech.errorMsg     = 'Did not hear any words, maybe mic not working?';
+      $scope.apply();
     }
   }
   $scope.acceptTranslation = () => {
-    $scope.translation  = true;
-    console.log('will accept translation: ', $scope.translatedText);
-    $scope.translatedText = '';
+    nData.speech.translationBox = true;
+    console.log('TODO: will accept translation: ', $scope.translatedText);
+
+    // TODO: WORKING HERE
+    // TODO: WORKING HERE
+    // TODO: WORKING HERE
+
+    nSpeech.acceptTranslation();
+    nData.speech.translatedText = '';
   }
-  $scope.rejectTranslation = () => {
-    $scope.translation  = true;
-    $scope.translatedText = '';
-    console.log('will reject translation: ', $scope.translatedText);
+  $scope.retryTranslation = () => {
+    nData.speech.translatedText = '';
+    console.log('will retry translation: ', nData.speech.translatedText);
+    $scope.talkInput();
   }
+  $scope.closeTranslation = () => {
+    nData.speech.recognition.stop();
+    nData.speech.translationBox = false;
+    nData.speech.errorMsg       = '';
+    nData.speech.listeningMsg   = '';
+    nData.speech.translatedText = '';
+    console.log('closing translation area: ', nData.speech.translatedText);
+    console.log('nData.speech.recognition: ', nData.speech.recognition);
+  }
+  $timeout(function() {$scope.translationBox = true}, 1000);     // TESTING
 
   // **--  KEYBOARD SHORTCUTS  --**
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
@@ -183,11 +213,12 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     } else if (e.keyCode === 27 && $scope.editMode === true) {    // Escape key
       $scope.blurNote();
     }
-  } 
+  }
+  
+  // Note Actions
   $scope.setEditMode = () => {
     $scope.editMode = true;
   }
-
   $scope.blurNote = function(caller) {
     if (caller === 'title') {
       // leave edit note mode alone...
@@ -303,7 +334,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     // for sort ng-select in LH Nav.
     nData.userPrefs.sortBy  = nData.userPrefs.sortBy || {display: 'Date', value: 'modified'};
     $scope.reverseNotes     = nData.userPrefs.sortBy.value === 'modified';
-}, error => {    
+  }, error => {    
     nData.retries = error;    // TESTING
     
     var confirm = $mdDialog.confirm()

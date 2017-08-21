@@ -4,12 +4,7 @@ The way it works is send once, then put in a 'pending queue' for 1 minute. If no
 
 var app = angular.module('noteServices', [])
 .service('nDates', function(){
-  this.getTimestamp = () => Date.now();  // Code Simplification
-
-  // Deprecated with code simplification line above.
-  // this.getTimestamp = function() {
-  //   return Date.now();
-  // }
+  this.getTimestamp = () => Date.now();
   this.stale = function(timestamp, duration) {
     timestamp = timestamp || 0;
     return Date.now() - timestamp > duration;
@@ -49,7 +44,15 @@ var app = angular.module('noteServices', [])
 .service('nData', function($mdDialog, nDates, nUtils, nDB) {
  /* This object is the main object displayed. It is common / reused among the different pages, i.e. current / hourly... data object contains all weather info per zip code. */
 
-//  Shared Object
+  //  Shared Object
+  let speech = {
+    recognition:    {}, 
+    translationBox: false, 
+    userTalking:    false, 
+    errorMsg:       '',
+    listeningMsg:   '',
+    translatedText: ''
+  };
   var data = {
     allNotes:       [],
     displayNotes:   [],
@@ -60,7 +63,9 @@ var app = angular.module('noteServices', [])
     retries:        0,    // TESTING
     serverQueue:    [],
     cursorLocation: 0,
+    recognition:    {},
     serverOffset:   0,
+    speech:         speech,
     timeDifference: 0,    // TESTING
     userPrefs:      {}
   };
@@ -377,6 +382,42 @@ var app = angular.module('noteServices', [])
     return arr.filter(filterFn);  
   }
 })
+.service('nSpeech', function(nData) {
+  function startListeningAnimation() {
+    let ticks     = 0, 
+        initMsg   = 'Listening'
+        _interval = 400;
+
+    nData.speech.listeningMsg = initMsg;
+
+    function tick() {
+      if (nData.speech.userTalking) {
+        if (ticks < 3) {
+          nData.speech.listeningMsg += ' .';
+          ticks++;
+        } else {
+          nData.speech.listeningMsg = initMsg;
+          ticks = 0;
+        }
+        $timeout(tick, _interval);
+      } else {
+        nData.speech.listeningMsg = '';
+      }
+    }
+
+    tick();
+  }
+  this.acceptTranslation = function() {
+    console.log('TODO: Incorporate translated text into selected note.');
+
+    // TODO: WORKING HERE
+    // TODO: WORKING HERE
+    // TODO: WORKING HERE
+
+  }
+})
+
+
 .service('nServer', function($http, $mdDialog, $q, $window, nData, nDates, nDB, nUtils){
   function httpReq(_typ, url, data){
     url = $window.location.origin + '/' + url;

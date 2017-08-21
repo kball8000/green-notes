@@ -49,7 +49,7 @@
                       md-is-locked-open="$mdMedia('gt-md')"
                       md-whiteframe='4'>
           <div ng-controller='leftCtrl' layout='column'>
-<!--        SIDENAV HEADER    -->
+            <!--   SIDENAV HEADER    -->
             <md-toolbar layout='row'>
               <h3 class="md-toolbar-tools" flex='80'>
                 Green Notes
@@ -175,6 +175,9 @@
             Version: 0.1.361
           </p>
           <ul>
+            <li>translationBox: {{n.speech.translationBox}}</li>
+            <li>translatedText: {{n.speech.translatedText}}</li>
+            <li>listeningMsg: {{n.speech.listeningMsg}}</li>
             <li>sortBy: {{n.userPrefs.sortBy}}</li>
             <li>userTalking: {{userTalking}}</li>
           </ul>
