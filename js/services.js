@@ -382,11 +382,12 @@ var app = angular.module('noteServices', [])
     return arr.filter(filterFn);  
   }
 })
-.service('nSpeech', function(nData) {
-  function startListeningAnimation() {
+.service('nSpeech', function($timeout, nData, nDates, nDB, nServer) {
+  this.startListeningAnimation = () => {
+    // function startListeningAnimation() {
     let ticks     = 0, 
-        initMsg   = 'Listening'
-        _interval = 400;
+      initMsg   = 'Listening'
+      _interval = 400;
 
     nData.speech.listeningMsg = initMsg;
 
@@ -407,13 +408,34 @@ var app = angular.module('noteServices', [])
 
     tick();
   }
-  this.acceptTranslation = function() {
-    console.log('TODO: Incorporate translated text into selected note.');
+  this.clearTranslationBox = (keepDisplayed) => {
+    nData.speech.errorMsg       = '';
+    nData.speech.listeningMsg   = '';
+    nData.speech.translatedText = ''; 
+    nData.speech.translationBox = keepDisplayed;
+  }
+  this.acceptTranslation = () => {
+    let newChunk    = nData.speech.translatedText,
+        cursor      = nData.selectedNote.cursorLocation,
+        content     = nData.selectedNote.content,
+        chunk_1     = content.slice(0, cursor),
+        chunk_2     = content.slice(cursor),
+        startsWithSpace  = /^ /,
+        endsWithSpace    = / $/;
 
-    // TODO: WORKING HERE
-    // TODO: WORKING HERE
-    // TODO: WORKING HERE
+    // add spaces if needed.
+    newChunk = (chunk_1.match(endsWithSpace)) ? newChunk : ' ' + newChunk;
+    newChunk = (chunk_2.match(startsWithSpace)) ? newChunk : newChunk + ' ';
 
+    // Update Params
+    nData.selectedNote.content        = chunk_1 + newChunk + chunk_2;
+    nData.selectedNote.cursorLocation = (newChunk) ? cursor + newChunk.length : cursor;
+    nData.selectedNote.modified       = nDates.getTimestamp();
+
+    // Save Selected Note
+    nDB._put('allNotes', nData.allNotes);
+    nData.addToQueue([nData.selectedNote.id]);
+    nServer.save();
   }
 })
 

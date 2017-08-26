@@ -1,13 +1,13 @@
 // gae = Google App Engine
 // 2017
 
-var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnimate', 'ngMaterial', 'ngMessages', 'ngSanitize', 'nSpeech'])
+var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnimate', 'ngMaterial', 'ngMessages', 'ngSanitize'])
 .config(function($mdGestureProvider, $mdThemingProvider) {
   $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
   $mdGestureProvider.skipClickHijack();
 })
-.controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nDB) {
+.controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nSpeech, nDB) {
   $scope.editMode       = false;
   $scope.userLoggedIn   = false;
   // $scope.userTalking    = false;
@@ -124,66 +124,44 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   // Speech to Text
   $scope.talkInput = () => {
 
-    function blar() {
-      $scope.userTalking  = false;
-      $scope.translatedText = 'Hey O!';
-    }   // TESTING
-
     // let recognition = new webkitSpeechRecognition();
     nData.speech.recognition = new webkitSpeechRecognition();
     
-    nData.speech.recognition.continuous = false;
+    nData.speech.recognition.continuous     = false;
     nData.speech.recognition.interimResults = false;
-    nData.speech.recognition.lang = "en-US";
+    nData.speech.recognition.lang           = "en-US";
 
-    // recognition.start();
-    nData.speech.userTalking    = true;
-    nData.speech.translationBox = true;
-    nData.speech.translatedText = '';
-    nData.speech.errorMsg       = '';
+    recognition.start();
+    nData.speech.userTalking = true;
+
+    nSpeech.clearTranslationBox(true);
     nSpeech.startListeningAnimation();
-    console.log('start listening to user.');    // TESTING
-    $timeout(blar, 2000);                       // TESTING
 
     nData.recognition.onresult = e => {
       nData.speech.translatedText = e.results[0][0].transcript;
-      nData.speech.userTalking    = false;    // updates UI
+      nData.speech.userTalking    = false;
       nData.speech.recognition.stop();
       $scope.apply();
     };
     nData.recognition.onerror = e => {
       nData.speech.recognition.stop();
-      nData.speech.userTalking  = false;    // updates UI
-      nData.speech.errorMsg     = 'Did not hear any words, maybe mic not working?';
+      nData.speech.userTalking  = false;
+      nData.speech.errorMsg     = 'Did not hear any words, maybe mic is not working?';
       $scope.apply();
     }
   }
   $scope.acceptTranslation = () => {
-    nData.speech.translationBox = true;
-    console.log('TODO: will accept translation: ', $scope.translatedText);
-
-    // TODO: WORKING HERE
-    // TODO: WORKING HERE
-    // TODO: WORKING HERE
-
     nSpeech.acceptTranslation();
-    nData.speech.translatedText = '';
+    nSpeech.clearTranslationBox();
   }
   $scope.retryTranslation = () => {
-    nData.speech.translatedText = '';
-    console.log('will retry translation: ', nData.speech.translatedText);
+    nSpeech.clearTranslationBox(true);
     $scope.talkInput();
   }
   $scope.closeTranslation = () => {
     nData.speech.recognition.stop();
-    nData.speech.translationBox = false;
-    nData.speech.errorMsg       = '';
-    nData.speech.listeningMsg   = '';
-    nData.speech.translatedText = '';
-    console.log('closing translation area: ', nData.speech.translatedText);
-    console.log('nData.speech.recognition: ', nData.speech.recognition);
+    nSpeech.clearTranslationBox();
   }
-  $timeout(function() {$scope.translationBox = true}, 1000);     // TESTING
 
   // **--  KEYBOARD SHORTCUTS  --**
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
@@ -316,7 +294,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   }
 
 })
-.controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer) {
+.controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer, nSpeech) {
   $scope.syncing = false;
   $scope.numShownNotes = 2;
   $scope.sortOptions = [
@@ -376,6 +354,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     nData.setPref('selectedId', note.id);
     nData.selectNote();
     nServer.getNote(note);              // Checks for updated note on server.
+    nSpeech.clearTranslationBox();
     $mdSidenav('left').close();
   }
   $scope.showMore = () => {
