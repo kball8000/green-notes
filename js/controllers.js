@@ -131,23 +131,23 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     nData.speech.recognition.interimResults = false;
     nData.speech.recognition.lang           = "en-US";
 
-    recognition.start();
+    nData.speech.recognition.start();
     nData.speech.userTalking = true;
 
     nSpeech.clearTranslationBox(true);
     nSpeech.startListeningAnimation();
 
-    nData.recognition.onresult = e => {
-      nData.speech.translatedText = e.results[0][0].transcript;
+    nData.speech.recognition.onresult = e => {
       nData.speech.userTalking    = false;
+      nData.speech.translatedText = e.results[0][0].transcript;
       nData.speech.recognition.stop();
-      $scope.apply();
+      $timeout($scope.apply);
     };
-    nData.recognition.onerror = e => {
-      nData.speech.recognition.stop();
+    nData.speech.recognition.onerror = e => {
       nData.speech.userTalking  = false;
       nData.speech.errorMsg     = 'Did not hear any words, maybe mic is not working?';
-      $scope.apply();
+      nData.speech.recognition.stop();
+      $timeout($scope.apply);
     }
   }
   $scope.acceptTranslation = () => {
