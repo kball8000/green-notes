@@ -21,6 +21,12 @@
 .links {
   text-decoration: none;
 }
+a:visited, a:link, a:hover {
+    color: rgb(76, 175, 80);
+}
+a:active {
+  color: rgb(0, 150, 0);
+}
 /* Search Autocomplete */
 .autocomplete-custom-template li {
   border-bottom: 1px solid #ccc;

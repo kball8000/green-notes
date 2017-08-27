@@ -80,7 +80,7 @@ angular.module('nFilters', [])
      * Creates a link out string, i.e. <a href="url">anchorText</a>
      */
 
-    let anchorRe  = new RegExp( /\([\w.]+\)/ );
+    let anchorRe  = new RegExp( /\([\w. ]+\)/ );
     let hrefRe    = new RegExp( /\[http[\w:/.?=&;@$+!*'()_-]+\]/ );
     let regex     = new RegExp(anchorRe.source + hrefRe.source, 'g');
     let matches   = line.match(regex),

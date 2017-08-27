@@ -1,5 +1,4 @@
 <div id='mainNotePage'>
-  <div id='takeOver' ng-show='takeOver'>
   </div>
   <md-card id='titleCard' flex>
     <form name='titleForm'>
@@ -78,6 +77,7 @@
          style="text-align:center;" 
          ng-hide='n.userPrefs.showTrash'>
       <md-button class='md-icon-button md-primary'
+                 id='searchBtn'
                  ng-href='/search'
                  ng-disabled='n.userPrefs.noNote'>
         <md-icon>

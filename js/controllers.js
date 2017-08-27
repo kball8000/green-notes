@@ -10,8 +10,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
 .controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nSpeech, nDB) {
   $scope.editMode       = false;
   $scope.userLoggedIn   = false;
-  // $scope.userTalking    = false;
-  // $scope.translationBox = false;
   $scope.loaded         = {
     data: false,
     page: false
@@ -48,9 +46,9 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   }
    
   // **--  NOTES FUNCTIONS  --**
-  function focusTitle() {
-    let el = $window.document.getElementById('noteTitle');
-    el.focus();
+  function focusInput(val) {
+    let el = $window.document.getElementById(val);
+    $timeout( () => {el.focus()} );   // timetout is for searchInput.
   }
   function focusTextArea() {
     let el = $window.document.getElementById('noteArea');
@@ -93,7 +91,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     nData.refreshDisplayNotes();
     
     $scope.editMode = true;     // To display textarea.
-    focusTitle();
+    focusInput('noteTitle');
     saveTo('both');
   }
   $scope.starNote = function() {
@@ -166,6 +164,14 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   // **--  KEYBOARD SHORTCUTS  --**
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
   // area, not to be confused with formated note in readonly mode.
+  function goToSearch() {
+    console.log('running gotosearch');
+    let s = angular.element(document.getElementById('searchBtn'));
+    console.log('searchBtn: ', s);
+    // angular.element(document.getElementById('searchBtn')).click();
+    document.getElementById('searchBtn').click();
+    focusInput('searchInput')
+  }
   $window.onclick = e => {
     // $window.document.onclick = e => {
     let edits = {
@@ -184,7 +190,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     // Using keyup so that escape key will work, could not figure it out on keypress.
     let shortcuts = {
       69: $scope.editNote,    // e char to edit note
-      78: $scope.newNote      // n char for new note
+      78: $scope.newNote,     // n char for new note
+      83: goToSearch          // s char for search
     };
     if (e.keyCode in shortcuts && $scope.editMode === false) {
       shortcuts[e.keyCode]();
