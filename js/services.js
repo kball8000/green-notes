@@ -383,6 +383,65 @@ var app = angular.module('noteServices', [])
   }
 })
 .service('nSpeech', function($timeout, nData, nDates, nDB, nServer) {
+
+  function addLeadOrTrailSpaces(str0, str1, newStr) {
+    let endOfSentence     = /[.!?] *?$/, 
+        endsWithNewline   = /\n$/,
+        startsWithNewline = /^\n/,
+        capNewStr         = newStr[0].toUpperCase() + newStr.slice(1);
+    
+      // Three options for previous string::
+      //   newline or nothing before newString > no space + cap
+      //   . > space and cap  
+      //   !. > space
+
+    if (str0.match(endsWithNewline) || str0.length === 0) {
+      newStr = capNewStr;
+    } else {
+      str0    = str0.replace(/ $/g, '');
+      newStr  = (str0.match(endOfSentence)) ? capNewStr : newStr;
+      newStr  = ' ' + newStr;
+    }
+
+      // Two options, starts with: 
+      //   newline nothing after newString > append .
+      //   _ > space
+    if (str1.match(startsWithNewline) || str1.length === 0) {
+      newStr = newStr + '.';
+    } else {
+      str1 = str1.replace(/^ /g, '');
+      newStr = newStr + ' ';
+    }
+          
+    return str0 + newStr + str1;
+  }
+  function processGrocery(str0, str1, newStr) {
+    let add = /add /,
+        endsWithNewline = /\n$/ ,
+        startsWithNewline = /^\n/;
+        first = true;
+
+   if (!str0.match(endsWithNewline) && str0.length !== 0) {
+      newStr = '\n' + newStr;
+    }
+
+    while (newStr.match(add)) {
+      if (first) {
+        newStr.replace('add ', '');
+      } else {
+        newStr.replace('add ', '\n');
+      }
+      str = str[0].toUpperCase() + str.slice(1);
+      first = false;
+    }
+
+    if (!str1.match(startsWithNewline) && str1.length !== 0) {
+      newStr = newStr + '\n';
+    }
+
+    return newStr;
+  }
+
   this.startListeningAnimation = () => {
     // function startListeningAnimation() {
     let ticks     = 0, 
@@ -420,12 +479,14 @@ var app = angular.module('noteServices', [])
         content     = nData.selectedNote.content,
         chunk_1     = content.slice(0, cursor),
         chunk_2     = content.slice(cursor),
-        startsWithSpace  = /^ /,
-        endsWithSpace    = / $/;
+        Grocery     = ['grocery', 'Grocery', 'grocery list', 'Grocery list', 'Grocery List'];
 
-    // add spaces if needed.
-    newChunk = (chunk_1.match(endsWithSpace)) ? newChunk : ' ' + newChunk;
-    newChunk = (chunk_2.match(startsWithSpace)) ? newChunk : newChunk + ' ';
+    // add spaces and capitalization if needed.
+    if (Grocery.includes(nData.selectedNote.title)) {
+      newChunck = processGrocery(newChunk)
+    } else {
+      newChunk = addLeadOrTrailSpaces(chunk_1, chunk_2, newChunk);
+    }
 
     // Update Params
     nData.selectedNote.content        = chunk_1 + newChunk + chunk_2;
