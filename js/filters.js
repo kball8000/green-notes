@@ -75,7 +75,7 @@ angular.module('nFilters', [])
     } 
     return line;
   }
-  function formatUrls(line){
+  function formatUrls(line) {
     /**
      * Creates a link out string, i.e. <a href="url">anchorText</a>
      */
@@ -101,11 +101,23 @@ angular.module('nFilters', [])
     }
     return line;
   }
+  function formatDateHeader(line) {
+    let re = /\d{1,2}[./]\d{1,2}[./]\d{4}/;
+        
+    // length is 10 for date and 4 for '<br>'.
+    if (line && line.length < 15 && line.match(re)) {
+      line = line.replace(/\//g, ' / ');
+      line = '<p class="dateBlock">' + line + '</p>';
+    }
+
+    return line;
+  }
   return input => {
     input = input || '';
     let lines = input.split('\n'),
         breakLines = lines.map( line => {
           line = formatHeaders(line);
+          line = formatDateHeader(line);
           line = formatLine(line);
           line = formatPhoneNum(line);
           line = formatUrls(line);

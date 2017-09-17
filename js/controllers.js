@@ -63,6 +63,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   }
   function saveTo(db, cancel) {
     function cancelTimeout(db, cancel) {
+      // i.e. 'dbSave' or 'serverSave'. Felt nData property name was more clear this way.
+      db = db + 'Save';   
       if(cancel){
         $timeout.cancel(nData.timeouts[db]);
       }
@@ -91,6 +93,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     nData.refreshDisplayNotes();
     
     $scope.editMode = true;     // To display textarea.
+    nData.pristineNote = false;
     focusInput('noteTitle');
     saveTo('both');
   }
@@ -110,6 +113,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $scope.editNote = function() {
     /* Change from view only to edit mode so user can edit the selected note */
     let note = nData.selectedNote;
+    nData.pristineNote = true;
+    
     
     // Checks for updated note on server.
     nServer.getNote(note);
@@ -165,9 +170,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
   // area, not to be confused with formated note in readonly mode.
   function goToSearch() {
-    console.log('running gotosearch');
     let s = angular.element(document.getElementById('searchBtn'));
-    console.log('searchBtn: ', s);
     // angular.element(document.getElementById('searchBtn')).click();
     document.getElementById('searchBtn').click();
     focusInput('searchInput')
@@ -212,12 +215,18 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       saveCursorLocation();
       $scope.editMode = false;
     }
+
+    if (!nData.pristineNote) {
+      saveTo('both', true);
+    }
     
-    saveTo('both', true); 
   }
   $scope.noteChg = function() {
     /*Runs anytime there is a change in the note input field in the app. Sets
     timeouts so that we are not saving to db and server on every character change.*/
+
+    nData.pristineNote = false;
+
     if (!nData.timeouts.dbSave) {
       nData.timeouts.dbSave = $timeout(saveTo, 4000, true, 'db');
     }

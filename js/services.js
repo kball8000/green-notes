@@ -129,17 +129,8 @@ var app = angular.module('noteServices', [])
   
 //  Shared functions to controllers
   data.setPref = (key, value) => {
-    console.log('setting key: ', key, ', value: ', value);
-    console.log('before data.userPrefs.sortBy: ', data.userPrefs.sortBy);
     data.userPrefs[key] = value;
-    console.log('after data.userPrefs.sortBy: ', data.userPrefs.sortBy);
-    let rslt = nDB._put('userPrefs', data.userPrefs);
-    console.log('result: ', rslt);
-    rslt.then(r => {
-      console.log('succeeded to save: ', r);
-    }, e => {
-      console.log('failed to save: ', e); 
-    })
+    nDB._put('userPrefs', data.userPrefs);
   }
   data.createNoteObj = function(id) {
     let timestamp = nDates.getTimestamp();
@@ -416,15 +407,15 @@ var app = angular.module('noteServices', [])
     return str0 + newStr + str1;
   }
   function processGrocery(str0, str1, newStr) {
+    /* str0 is text before spoken text, newStr is spoken text and str1 is text after.
+    */
     let add = /add /,
         endsWithNewline = /\n$/ ,
         startsWithNewline = /^\n/;
         first = true;
-
-   if (!str0.match(endsWithNewline) && str0.length !== 0) {
+    if (!str0.match(endsWithNewline) && str0.length !== 0) {
       newStr = '\n' + newStr;
     }
-
     while (newStr.match(add)) {
       if (first) {
         newStr.replace('add ', '');
