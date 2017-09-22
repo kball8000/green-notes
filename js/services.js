@@ -418,7 +418,7 @@ var app = angular.module('noteServices', [])
   }
   function processGrocery(newStr) {
     // since it gets and, at and 'add' confused.
-    let idx, arr = ['add', 'and', 'at'];
+    let idx, arr = ['add ', 'and ', 'at '];
 
     for (let x in arr) {
       idx = newStr.indexOf(arr[x]);
