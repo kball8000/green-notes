@@ -20,6 +20,9 @@ md-list-item, md-list-item .md-list-item-inner {
 .headerM:first-of-type {
   margin-top: 0.1em;
 }
+.gray {
+  color: grey;
+}
 .dateBlock {
   font-size: 0.8em;
   padding-bottom: 0em;

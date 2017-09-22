@@ -172,7 +172,7 @@
 
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
-            Version: 0.1.40e
+            Version: 0.1.41
           </p>
           <ul>
             <li>translationBox: {{n.speech.translationBox}}</li>
@@ -185,7 +185,10 @@
           <p> Pseudo Markdown rules:</p>
           <ul>
             <li>'<code>.h1 </code>' at beginning of line - Header</li>
+            <li>'<code>- </code>' at beginning of line - unordered list</li>
+            <li>'<code>---</code>' entire line - hr</li>
             <li><code>__text__</code> or <code>**text**</code> - Bold</li>
+            <li><code>--text--</code> - Grayed out text for minor notes</li>
             <li><code>`code`</code> (backtick) - for inline code, no block code available currently</li>
             <li><code>~~text~~</code> (tilde) - for strikethru text</li>
             <li>Reasonable phone number formats</li>

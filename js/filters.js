@@ -7,9 +7,13 @@ angular.module('nFilters', [])
     /**
      * Line that starts with header markdown will be styled accordingly.
      */
+
     if (line.indexOf('.h1 ') !== -1) {
        line = '<p class="headerM">' + line.slice(4) + '</p>'
+    } else if(line === '---') {
+      line = '<hr>'
     } else {
+      line = line.indexOf('- ') === 0 ? '&bull; ' + line[2].toUpperCase() + line.slice(3) : line;
       line += '<br>';
     }
     return line;
@@ -21,6 +25,7 @@ angular.module('nFilters', [])
     let regs = {
       bold1 : {'regex': /__/g, 'replace': '__', beg: '<b>', end: '</b>' },
       bold2 : {'regex': /\*\*/g, 'replace': '**', beg: '<b>', end: '</b>' },
+      gray : {'regex': /--/g, 'replace': '--', beg: '<span class="gray">', end: '</span>' },
       code : {'regex': /`/g, 'replace': '`', beg: '<code>', end: '</code>' },
       strike : {'regex': /~~/g, 'replace': '~~', beg: '<strike>', end: '</strike>' }
     }, 
