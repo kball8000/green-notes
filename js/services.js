@@ -420,13 +420,8 @@ var app = angular.module('noteServices', [])
     let idx = newStr.indexOf('add');
 
     while (idx !== -1) {
-      if (idx === 0) {
-        newStr = newStr.replace('add ', '');
-        newStr = newStr[0].toUpperCase() + newStr.slice(1);
-      } else {
-        newStr = newStr.replace('add ', '\n');
-        newStr = newStr.slice(0, idx+1) + newStr[idx+1].toUpperCase() + newStr.slice(idx+2);
-      }
+      newStr = newStr.replace(/a[nd]d/, '\n');  // since it gets and and add confused.
+      newStr = newStr.slice(0, idx+1) + newStr[idx+1].toUpperCase() + newStr.slice(idx+2);
       idx = newStr.indexOf('add');
     }
     newStr = replaceNumbers(newStr);
