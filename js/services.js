@@ -420,7 +420,8 @@ var app = angular.module('noteServices', [])
     let idx = newStr.indexOf('add');
 
     while (idx !== -1) {
-      newStr = newStr.replace(/a[nd]d/, '\n');  // since it gets and and add confused.
+      // since it gets and, at and 'add' confused.
+      newStr = newStr.replace(/a[ndt]d?/g, '\n');
       newStr = newStr.slice(0, idx+1) + newStr[idx+1].toUpperCase() + newStr.slice(idx+2);
       idx = newStr.indexOf('add');
     }
