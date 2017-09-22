@@ -417,13 +417,17 @@ var app = angular.module('noteServices', [])
     return newStr;
   }
   function processGrocery(newStr) {
-    let idx = newStr.indexOf('add');
+    // since it gets and, at and 'add' confused.
+    let idx, arr = ['add', 'and', 'at'];
 
-    while (idx !== -1) {
-      // since it gets and, at and 'add' confused.
-      newStr = newStr.replace(/a[ndt]d?/g, '\n');
-      newStr = newStr.slice(0, idx+1) + newStr[idx+1].toUpperCase() + newStr.slice(idx+2);
-      idx = newStr.indexOf('add');
+    for (let x in arr) {
+      idx = newStr.indexOf(arr[x]);
+      
+      while (idx !== -1) {
+        newStr = newStr.replace(arr[x], '\n');
+        newStr = newStr.slice(0, idx+1) + newStr[idx+1].toUpperCase() + newStr.slice(idx+2);
+        idx = newStr.indexOf(arr[x]);
+      }            
     }
     newStr = replaceNumbers(newStr);
     return newStr;
