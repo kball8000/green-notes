@@ -374,62 +374,62 @@ var app = angular.module('noteServices', [])
   }
 })
 .service('nSpeech', function($timeout, nData, nDates, nDB, nServer) {
+  function replaceNumbers(str) {
+    let arr = [, /one/gi, /two/gi, /three/gi];
+    str = str || '';
 
+    for (let n in arr){
+      str = str.replace(arr[n], parseInt(n));
+    }
+
+    return str;    
+  }
   function addLeadOrTrailSpaces(str0, str1, newStr) {
-    let endOfSentence     = /[.!?] *?$/, 
-        endsWithNewline   = /\n$/,
-        startsWithNewline = /^\n/,
-        capNewStr         = newStr[0].toUpperCase() + newStr.slice(1);
+    str0    = str0    || '';
+    str1    = str1    || '';
+    newStr  = newStr  || '';
     
+    let endOfSentence     = /[.!?] *$/,
+        endsWithNewline   = /\n$/,
+        endsWithSpace     = / $/,
+        startsWithCapital = /^ *[A-Z]/,
+        startsWithNewline = /^\n/,
+        startsWithSpace   = /^ /,
+        capNewStr         = newStr[0].toUpperCase() + newStr.slice(1);
+
       // Three options for previous string::
       //   newline or nothing before newString > no space + cap
       //   . > space and cap  
       //   !. > space
-
-    if (str0.match(endsWithNewline) || str0.length === 0) {
+    if (str0.match(endsWithNewline) || str0.match(endOfSentence) || str0.length === 0) {
       newStr = capNewStr;
-    } else {
-      str0    = str0.replace(/ $/g, '');
-      newStr  = (str0.match(endOfSentence)) ? capNewStr : newStr;
-      newStr  = ' ' + newStr;
     }
+    newStr = str0.match(endsWithSpace) ? newStr : ' ' + newStr;      
 
       // Two options, starts with: 
       //   newline nothing after newString > append .
       //   _ > space
-    if (str1.match(startsWithNewline) || str1.length === 0) {
+    if (str1.match(startsWithNewline) || str1.match(startsWithCapital) || str1.length === 0) {
       newStr = newStr + '.';
-    } else {
-      str1 = str1.replace(/^ /g, '');
-      newStr = newStr + ' ';
     }
+    newStr = str1.match(startsWithSpace) ? newStr : newStr + ' ';      
           
-    return str0 + newStr + str1;
+    return newStr;
   }
-  function processGrocery(str0, str1, newStr) {
-    /* str0 is text before spoken text, newStr is spoken text and str1 is text after.
-    */
-    let add = /add /,
-        endsWithNewline = /\n$/ ,
-        startsWithNewline = /^\n/;
-        first = true;
-    if (!str0.match(endsWithNewline) && str0.length !== 0) {
-      newStr = '\n' + newStr;
-    }
-    while (newStr.match(add)) {
-      if (first) {
-        newStr.replace('add ', '');
+  function processGrocery(newStr) {
+    let idx = newStr.indexOf('add');
+
+    while (idx !== -1) {
+      if (idx === 0) {
+        newStr = newStr.replace('add ', '');
+        newStr = newStr[0].toUpperCase() + newStr.slice(1);
       } else {
-        newStr.replace('add ', '\n');
+        newStr = newStr.replace('add ', '\n');
+        newStr = newStr.slice(0, idx+1) + newStr[idx+1].toUpperCase() + newStr.slice(idx+2);
       }
-      str = str[0].toUpperCase() + str.slice(1);
-      first = false;
+      idx = newStr.indexOf('add');
     }
-
-    if (!str1.match(startsWithNewline) && str1.length !== 0) {
-      newStr = newStr + '\n';
-    }
-
+    newStr = replaceNumbers(newStr);
     return newStr;
   }
 
@@ -469,15 +469,19 @@ var app = angular.module('noteServices', [])
         cursor      = nData.selectedNote.cursorLocation,
         content     = nData.selectedNote.content,
         chunk_1     = content.slice(0, cursor),
-        chunk_2     = content.slice(cursor),
-        Grocery     = ['grocery', 'Grocery', 'grocery list', 'Grocery list', 'Grocery List'];
+        chunk_2     = content.slice(cursor);
 
     // add spaces and capitalization if needed.
-    if (Grocery.includes(nData.selectedNote.title)) {
-      newChunck = processGrocery(newChunk)
+    if(nData.selectedNote.title.match(/grocery/i)) {
+      newChunk = processGrocery(newChunk)
     } else {
-      newChunk = addLeadOrTrailSpaces(chunk_1, chunk_2, newChunk);
+      newChunk = addLeadOrTrailSpaces(chunk_1, chunk_2, newChunk);  
     }
+    
+    // WORKING HERE. NEED TO GET LENGTH FROM GROCERY FILTER
+    // WORKING HERE. NEED TO GET LENGTH BACK FROM addLEADorTRAILspaces
+    // NEED TO GO BACK TO NOT MODIFYING STR0 OR STR1 IN REMOVE LEAD/TRAIL SPACES.
+
 
     // Update Params
     nData.selectedNote.content        = chunk_1 + newChunk + chunk_2;

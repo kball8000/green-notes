@@ -5,6 +5,12 @@
   }
 }
 
+/* LH Panel List of Titles */
+md-list-item, md-list-item .md-list-item-inner {
+  min-height: 30px;
+  height: 38px;
+}
+
 /* Note seudoMarkdown */
 .headerM {
   margin-bottom: 0.2em;
