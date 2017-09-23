@@ -170,10 +170,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
   // area, not to be confused with formated note in readonly mode.
   function goToSearch() {
-    let s = angular.element(document.getElementById('searchBtn'));
-    // angular.element(document.getElementById('searchBtn')).click();
     document.getElementById('searchBtn').click();
-    focusInput('searchInput')
+    $timeout(focusInput('searchInput'));
   }
   $window.onclick = e => {
     // $window.document.onclick = e => {
@@ -196,11 +194,9 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       78: $scope.newNote,     // n char for new note
       83: goToSearch          // s char for search
     };
-    console.log('keycode: ', e.keyCode );
-    if (e.keyCode in shortcuts && $scope.editMode === false) {
+    if (e.keyCode in shortcuts && $scope.editMode === false && e.target.id !== 'searchInput') {
       shortcuts[e.keyCode]();
     } else if (e.keyCode === 27 && $scope.editMode === true) {    // Escape key
-      console.log('running blurnote');
       $timeout($scope.blurNote());
     }
   }

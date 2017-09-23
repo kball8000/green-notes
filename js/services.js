@@ -359,15 +359,28 @@ var app = angular.module('noteServices', [])
       let lowercaseQuery = angular.lowercase(query);
       return elem.value.indexOf(lowercaseQuery) !== -1;
     }
+    function removeFormatElements(str) {
+      let arr = ['<br>', '.h1', '---', '--', '__', '**', '~~'];
+      for (x in arr) {
+        str = nUtils.replElemString(str, arr[x], '');
+      }
+      return str;
+    }
+    function trimContent(str) {
+      let numKeepChars = 20,
+          idx           = str.indexOf(query);
+      idx = (idx < numKeepChars) ? 0 : idx - numKeepChars;
+      return str.slice(idx);
+    }
     
     let arr = (inFavs) ? filterFavs(nData.allNotes) : nData.allNotes;
     arr = filterTrash(arr, inTrash);
     arr = arr.map( note => {
       let title   = note.title.toUpperCase(),
-          content = nUtils.replElemString(note.content, '<br>', ' '),
-          value   = (title + '' + content).toLowerCase();  // for search filter.
+          content = removeFormatElements(note.content),
+          value   = (title + ' ' + content).toLowerCase();  // for search filter.
       
-      return {id: note.id, value: value, title: title, content: content};
+      return {id: note.id, value: value, title: title, content: trimContent(content)};
     })
     
     return arr.filter(filterFn);  
@@ -417,7 +430,7 @@ var app = angular.module('noteServices', [])
     return newStr;
   }
   function processGrocery(newStr) {
-    // since it gets and, at and 'add' confused.
+    // since voice recognition gets and, at and 'add' confused.
     let idx, arr = ['add ', 'and ', 'at '];
 
     for (let x in arr) {
