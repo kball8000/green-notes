@@ -196,10 +196,12 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       78: $scope.newNote,     // n char for new note
       83: goToSearch          // s char for search
     };
+    console.log('keycode: ', e.keyCode );
     if (e.keyCode in shortcuts && $scope.editMode === false) {
       shortcuts[e.keyCode]();
     } else if (e.keyCode === 27 && $scope.editMode === true) {    // Escape key
-      $scope.blurNote();
+      console.log('running blurnote');
+      $timeout($scope.blurNote());
     }
   }
   
