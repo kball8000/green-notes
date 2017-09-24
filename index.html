@@ -172,40 +172,72 @@
 
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
-            Version: 0.1.42
+            Version: 0.1.42a
           </p>
-          <ul>
-            <li>translationBox: {{n.speech.translationBox}}</li>
-            <li>translatedText: {{n.speech.translatedText}}</li>
-            <li>listeningMsg: {{n.speech.listeningMsg}}</li>
-            <li>sortBy: {{n.userPrefs.sortBy}}</li>
-            <li>userTalking: {{userTalking}}</li>
-          </ul>
-          <hr>
-          <p> Pseudo Markdown rules:</p>
-          <ul>
-            <li>'<code>.h1 </code>' at beginning of line - Header</li>
-            <li>'<code>- </code>' at beginning of line - unordered list</li>
-            <li>'<code>---</code>' entire line - hr</li>
-            <li><code>__text__</code> or <code>**text**</code> - Bold</li>
-            <li><code>--text--</code> - Grayed out text for minor notes</li>
-            <li><code>`code`</code> (backtick) - for inline code, no block code available currently</li>
-            <li><code>~~text~~</code> (tilde) - for strikethru text</li>
-            <li>Reasonable phone number formats</li>
-            <li>Links in (anchor text)[url] format</li>
-          </ul>
-          <p> Keyboard Shortcuts </p>
-          <ul>
-            <li>'<code>e</code>' - Edit note [temp test]</li>
-            <li>'<code>n</code>' - Create new note</li>
-            <li>'<code>s</code>' - Search / Switch Note</li>
-            <li>'<code>Esc</code>' - Done editing note</li>
-          </ul>
-          <p> Verbal Shortcuts </p>
-          <ul>
-            <li>'<code>Add</code>' - When in grocery list, adds another item to the list</li>
-          </ul>
 
+          <!-- <ul>
+            <li>translationBox: {{n.speech.translationBox}}</li>
+          </ul>
+          <hr> -->
+
+          <!-- <p> Pseudo Markdown rules </p> -->
+          <!-- <div flex> -->
+              <h4 ng-click='showTips=!showTips' style="padding: 0.5em 0 0 1.5em;">
+                  <span style='padding-right:1.5em;'>Tips</span>
+                  <md-button class='md-icon-button'>
+                      <md-icon>
+                          {{ showTips ? 'expand_less' : 'expand_more' }} 
+                        </md-icon>      
+                  </md-button>
+                  
+              </h4>
+    
+          <!-- </div> -->
+              
+          
+
+          <div ng-show='showTips'>
+            <md-toolbar layout="row" class="md-hue-1">
+              <div class="md-toolbar-tools">
+                <span>Pseudo Markdown rules</span>
+              </div>
+            </md-toolbar>
+            <ul>
+              <li>'<code>.h1 </code>' at beginning of line - Header</li>
+              <li>'<code>- </code>' at beginning of line &bull; unordered list</li>
+              <li>'<code>---</code>' entire line - hr</li>
+              <li><code>__text__</code> or <code>**text**</code> - Bold</li>
+              <li><code>--text--</code> - Grayed out text for minor notes</li>
+              <li><code>`code`</code> (backtick) - for inline code, no block code available currently</li>
+              <li><code>~~text~~</code> (tilde) - for strikethru text</li>
+              <li>Reasonable phone number formats</li>
+              <li>Links in (anchor text)[url] format</li>
+            </ul>
+
+            <!-- <p> Keyboard Shortcuts </p> -->
+            <md-toolbar layout="row" class="md-hue-1">
+              <div class="md-toolbar-tools">
+                <span>Keyboard Shortcuts</span>
+              </div>
+            </md-toolbar>
+            <ul>
+              <li>'<code>e</code>' - Edit note [temp test]</li>
+              <li>'<code>n</code>' - Create new note</li>
+              <li>'<code>s</code>' - Search / Switch Note</li>
+              <li>'<code>Esc</code>' - Done editing note</li>
+            </ul>
+
+            <!-- <p> Verbal Shortcuts </p> -->
+            <md-toolbar layout="row" class="md-hue-1">
+              <div class="md-toolbar-tools">
+                <span>Verbal Shortcuts</span>
+              </div>
+            </md-toolbar>
+            <ul>
+              <li>'<code>Add</code>' - When in grocery list, adds another item to the list</li>
+            </ul>
+          </div>
+        
           <!--***  DEBUG CODE  ***-->
           <!-- <hr>
            <ul> 
