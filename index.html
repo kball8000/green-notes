@@ -172,29 +172,17 @@
 
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
-            Version: 0.1.42a
+            Version: 0.1.42b
           </p>
 
-          <!-- <ul>
-            <li>translationBox: {{n.speech.translationBox}}</li>
-          </ul>
-          <hr> -->
-
-          <!-- <p> Pseudo Markdown rules </p> -->
-          <!-- <div flex> -->
-              <h4 ng-click='showTips=!showTips' style="padding: 0.5em 0 0 1.5em;">
-                  <span style='padding-right:1.5em;'>Tips</span>
-                  <md-button class='md-icon-button'>
-                      <md-icon>
-                          {{ showTips ? 'expand_less' : 'expand_more' }} 
-                        </md-icon>      
-                  </md-button>
-                  
-              </h4>
-    
-          <!-- </div> -->
-              
-          
+          <h4 ng-click='toggleShowTips()' style="padding: 0.5em 0 0 1.5em;" id='tips'>
+              <span style='padding-right:1.5em;'>Tips</span>
+              <md-button class='md-icon-button'>
+                  <md-icon>
+                      {{ showTips ? 'expand_less' : 'expand_more' }} 
+                    </md-icon>      
+              </md-button>    
+          </h4>          
 
           <div ng-show='showTips'>
             <md-toolbar layout="row" class="md-hue-1">

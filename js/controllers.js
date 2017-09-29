@@ -7,7 +7,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
   $mdGestureProvider.skipClickHijack();
 })
-.controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, nData, nDates, nUtils, nServer, nSpeech, nDB) {
+.controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, $anchorScroll, nData, nDates, nUtils, nServer, nSpeech, nDB) {
   $scope.editMode       = false;
   $scope.userLoggedIn   = false;
   $scope.loaded         = {
@@ -97,19 +97,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     focusInput('noteTitle');
     saveTo('both');
   }
-  $scope.starNote = function() {
-    nData.selectedNote.fav = !nData.selectedNote.fav;
-    nData.modified = nDates.getTimestamp();
-    saveTo('both', true);
-  }
-  $scope.removeNote = function() {
-    nData.removeNote();
-    saveTo('both', true);
-  }
-  $scope.restoreNote = function() {
-    nData.restoreNote();
-    saveTo('both', true);
-  }
   $scope.editNote = function() {
     /* Change from view only to edit mode so user can edit the selected note */
     let note = nData.selectedNote;
@@ -123,7 +110,50 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     $scope.editMode = true; 
     $timeout(focusTextArea);
   }
+  $scope.setEditMode = () => {
+    $scope.editMode = true;
+  }
+  $scope.blurNote = function(caller) {
+    if (caller === 'title') {
+      // leave edit note mode alone...
+      nData.alertUserIfDuplicateTitle();
+    } else {
+      saveCursorLocation();
+      $scope.editMode = false;
+    }
 
+    if (!nData.pristineNote) {
+      saveTo('both', true);
+    }
+    
+  }
+  $scope.noteChg = function() {
+    /*Runs anytime there is a change in the note input field in the app. Sets
+    timeouts so that we are not saving to db and server on every character change.*/
+
+    nData.pristineNote = false;
+
+    if (!nData.timeouts.dbSave) {
+      nData.timeouts.dbSave = $timeout(saveTo, 4000, true, 'db');
+    }
+    if (!nData.timeouts.serverSave) {
+      nData.timeouts.serverSave = $timeout(saveTo, 8000, true, 'server');
+    }
+  }
+  $scope.starNote = function() {
+    nData.selectedNote.fav = !nData.selectedNote.fav;
+    nData.modified = nDates.getTimestamp();
+    saveTo('both', true);
+  }
+  $scope.removeNote = function() {
+    nData.removeNote();
+    saveTo('both', true);
+  }
+  $scope.restoreNote = function() {
+    nData.restoreNote();
+    saveTo('both', true);
+  }
+  
   // Speech to Text
   $scope.talkInput = () => {
 
@@ -200,37 +230,13 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       $timeout($scope.blurNote());
     }
   }
+
   
   // Note Actions
-  $scope.setEditMode = () => {
-    $scope.editMode = true;
-  }
-  $scope.blurNote = function(caller) {
-    if (caller === 'title') {
-      // leave edit note mode alone...
-      nData.alertUserIfDuplicateTitle();
-    } else {
-      saveCursorLocation();
-      $scope.editMode = false;
-    }
-
-    if (!nData.pristineNote) {
-      saveTo('both', true);
-    }
-    
-  }
-  $scope.noteChg = function() {
-    /*Runs anytime there is a change in the note input field in the app. Sets
-    timeouts so that we are not saving to db and server on every character change.*/
-
-    nData.pristineNote = false;
-
-    if (!nData.timeouts.dbSave) {
-      nData.timeouts.dbSave = $timeout(saveTo, 4000, true, 'db');
-    }
-    if (!nData.timeouts.serverSave) {
-      nData.timeouts.serverSave = $timeout(saveTo, 8000, true, 'server');
-    }
+  $scope.toggleShowTips = function() {
+    // Expands / collapses the Tips secion at the bottom of the notes page.
+    $scope.showTips = !$scope.showTips;
+    ($location.hash() !== 'tips') ? $location.hash('tips') : $anchorScroll();    
   }
   
   // **--  LOADING APP  --**
