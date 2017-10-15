@@ -27,7 +27,7 @@
     <script src="js/services.js"></script>
     <script src="js/filters.js"></script>
 
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
     <link rel="stylesheet" href="css/lib/angular-material.min.css">
     <link rel="stylesheet" href="css/green-notes.css">
     <link rel='icon' href="favicon.ico">
@@ -162,7 +162,45 @@
 <!--    NOTE TITLE / MAIN HEADER / LOGIN    -->
 <!--    No idea why 'layout='column' does not work in 'md-content'   -->
         <md-content class='mainContent' flex>
-          
+          <div style='padding:1.5em 0 0 1em;'>
+            <div id='newInput' style='min-height:5em; background-color:beige'>
+              <span id='newInputText' ng-bind-html='newContent'>
+              </span>
+              <span id='testCharWidth' style='color:rgba(0,0,0,0.5); position:absolute; top:0;'>
+                {{newChar}}
+              </span>
+            </div>
+            <div flex>
+              <md-button class='md-icon-button' flex='5'>
+                <md-icon>
+                    format_bold
+                </md-icon>      
+              </md-button>    
+              <md-button class='md-icon-button' flex='5'>
+                <md-icon>
+                    format_italic
+                </md-icon>      
+              </md-button>    
+              <md-button class='md-icon-button' flex='5'>
+                <md-icon>
+                    format_underline
+                </md-icon>      
+              </md-button>    
+              <md-button class='md-icon-button' flex='5'>
+                <md-icon>
+                  format_strikethrough
+                </md-icon>      
+              </md-button>    
+            
+            </div>
+            <div contenteditable='true' ng-bind-html='divContent' id='divEdit'>
+              <!-- {{divContent}} -->
+            </div>
+          </div>
+          <p>newEdit: {{newEdit}}</p>
+          <md-button ng-click='editOn()'>Start</md-button>
+          <md-button ng-click='editOff()'>Done</md-button>
+          <md-button ng-click='getLocation()'>Location</md-button>
           <div layout="row" layout-sm="column" layout-align="space-around"
                ng-hide='loaded.page' flex>
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
@@ -172,7 +210,7 @@
 
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
-            Version: 0.1.42b
+            Version: 0.1.43
           </p>
 
           <h4 ng-click='toggleShowTips()' style="padding: 0.5em 0 0 1.5em;" id='tips'>

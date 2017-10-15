@@ -735,10 +735,12 @@ var app = angular.module('noteServices', [])
     return defer.promise;
   }
   this.getUser = function() {
+    // SHOULD CONSIDER MAKING THIS A POST REQUEST. I DO NOT WANT THIS CACHED.
     var deferred = $q.defer();
     
-    httpReq('get', 'getuser').then( r => {
+    httpReq('post', 'getuser').then( r => {
       nDB.waitFor('open').then( () => {
+        console.log('getuser response: ', r);
         deferred.resolve(r.data.user_id);
       });
     }, () => {

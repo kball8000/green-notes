@@ -15,6 +15,92 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     page: false
   }
 
+  $scope.newEdit = false;
+  // $scope.divContent = 'kaboom?<br><b>More</b> Kaboom??';
+  $scope.divContent = 'kaboom?<br><b>More</b> Kaboom??<div>Try this in <i>italics</i>.</div>';
+  $scope.newContent = 'blar<br>blar blarj blar blarj blar blarj blar blarj blar blarj blar blarj blar blarj  blarj blar blarj blarj blar blarj blarj blar blarj';
+  //16 35 (18) 53 (18), 2 pixels between lines.
+  // $scope.newContent = 'blar <br>blar blar<br> blars blars';
+  // character width = new width - old width.
+
+  let keyDict = (() => {
+    let obj = {}, i = 0;
+    let arr = [32, 188, 190];
+
+    for(i=48; i<58; i++){
+      obj[i] = true;
+    }
+    for(i=65; i<91; i++){
+      obj[i] = true;
+    }
+    for(i=0; i<arr.length; i++){
+      obj[arr[i]] = true;
+    }
+
+    return obj;
+  })();
+  $window.document.onclick = e => {
+    // Client / Layer / Offset / Page, only client looks 'wrong for me' depends on scoll location.
+
+    // use element.offsetLeft / offsetHeight in conjunction with e.pageX or e.clientX (e = click)
+    // use element.offsetTop / offsetHeight in conjunction with e.pageY or e.clientY (e = click)
+    // still need to know the number of rows the text occupies.
+
+    let el = document.getElementById('newInputText');
+    $scope.newEdit = true;
+    $timeout($scope.apply);
+    // console.log('pageX: ', e.pageX, ', pageY: ', e.pageY, ', clientX: ', e.clientX, ', clientY: ', e.clientY);
+    // console.log('newInputText.offsetWidth: ', el.offsetWidth, ', offsetLeft: ', el.offsetLeft);
+    // console.log('newInputText.offsetTop: ', el.offsetTop, 'offsetHeighet: ', el.offsetHeight);
+    // console.log('newInputText.offsetTop: ', el.offsetTop);
+    // console.dir(el);
+  }
+  function getWidthK(oldWidth) {
+    let el0 = document.getElementById('newInputText');
+    let el1 = document.getElementById('testCharWidth');
+    // console.log('hidden width: ', el1.offsetWidth, ', oldWidth: ', oldWidth);
+    // console.log('calc width: ', (el0.offsetWidth - oldWidth) );
+  }
+  $window.onkeydown = e => {
+    // 48-57, 65-90, 
+    // console.log('keyCode: ', e.keyCode);
+    let el0 = document.getElementById('newInputText');
+    let oldWidth;
+    // console.dir(e);
+    if(e.keyCode === 32) {
+      // e.preventDefault();
+      $scope.newContent = $scope.newContent + ' ';
+    }
+    if(e.keyCode in keyDict) {
+      $scope.newChar = e.key;
+      // console.log('el0.offsetWidth: ', el0.offsetWidth);
+      oldWidth = el0.offsetWidth;
+      $scope.newContent = $scope.newContent + e.key;
+      $scope.newChar = e.key
+      $timeout(getWidthK, 10, true, oldWidth);
+    }
+    
+    $timeout($scope.apply);
+  }
+  $scope.editOn = () => {
+    $scope.newEdit = true;
+    let el = $window.document.getElementById('divEdit');
+    console.dir(el);
+    console.log('divContent: ', el.textContent);
+    // console.log('divContent: ', $scope.divContent);
+  }
+  $scope.editOff = () => {
+    $scope.newEdit = false;
+    console.log('content: ', $scope.newContent);
+  }
+  $scope.getLocation = () => {
+    let el = document.getElementById('newInput');
+    let x = window.pageXOffset;
+    let y = window.pageYOffset;
+    console.log('x: ', x, ', y: ', y);
+  }
+  
+
   // **--  LOGIN FUNCTIONS  --**
   $scope.googleLoginImg = 'btn_google_signin_dark_normal_web.png';
   $scope.googleImgChg = function(evt) {
@@ -203,33 +289,33 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     document.getElementById('searchBtn').click();
     $timeout(focusInput('searchInput'));
   }
-  $window.onclick = e => {
-    // $window.document.onclick = e => {
-    let edits = {
-      noteTitle:  true,
-      noteArea:   true,
-      doneButton: true,
-      editButton: true,
-      editIcon:   true
-    };
-    if ( !(e.target.id in edits) ) {
-      $scope.editMode = false;
-      $timeout($scope.digest)
-    }
-  }
-  $window.document.onkeyup = e => {
-    // Using keyup so that escape key will work, could not figure it out on keypress.
-    let shortcuts = {
-      69: $scope.editNote,    // e char to edit note
-      78: $scope.newNote,     // n char for new note
-      83: goToSearch          // s char for search
-    };
-    if (e.keyCode in shortcuts && $scope.editMode === false && e.target.id !== 'searchInput') {
-      shortcuts[e.keyCode]();
-    } else if (e.keyCode === 27 && $scope.editMode === true) {    // Escape key
-      $timeout($scope.blurNote());
-    }
-  }
+  // $window.onclick = e => {
+  //   // $window.document.onclick = e => {
+  //   let edits = {
+  //     noteTitle:  true,
+  //     noteArea:   true,
+  //     doneButton: true,
+  //     editButton: true,
+  //     editIcon:   true
+  //   };
+  //   if ( !(e.target.id in edits) ) {
+  //     $scope.editMode = false;
+  //     $timeout($scope.digest)
+  //   }
+  // }
+  // $window.document.onkeyup = e => {
+  //   // Using keyup so that escape key will work, could not figure it out on keypress.
+  //   let shortcuts = {
+  //     69: $scope.editNote,    // e char to edit note
+  //     78: $scope.newNote,     // n char for new note
+  //     83: goToSearch          // s char for search
+  //   };
+  //   if (e.keyCode in shortcuts && $scope.editMode === false && e.target.id !== 'searchInput') {
+  //     shortcuts[e.keyCode]();
+  //   } else if (e.keyCode === 27 && $scope.editMode === true) {    // Escape key
+  //     $timeout($scope.blurNote());
+  //   }
+  // }
 
   
   // Note Actions

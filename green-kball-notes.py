@@ -10,7 +10,7 @@ import models   # ndb.Model from app engine datastore
 # debugging
 #import random
 # import time
-# import logging
+import logging
 # TODO: add a cron job to check and remove duplicate ids.
 # additional note.
 
@@ -24,7 +24,6 @@ def verify_next_id(user, _id):
         obj     = {'error_type': 'id', 'message': msg}
         
         models.Error.put_error(user, obj) 
-
 
 class Basic(webapp2.RequestHandler):
     def get(self):
@@ -43,7 +42,7 @@ class Basic(webapp2.RequestHandler):
         self.response.write(page)
 
 class GetUser(webapp2.RequestHandler):
-    def get(self):
+    def post(self):
         
         user        = users.get_current_user()        
         user_id     = user.user_id() if user else None
@@ -52,13 +51,15 @@ class GetUser(webapp2.RequestHandler):
         
         if user_id:
             models.UserIds.save_id(user_id) # Save in dict for running backups
-            
+        
+        logging.info('userid response: %s' %response)
+
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response))
 
 class DelNote(webapp2.RequestHandler):
     # Have not yet and may note implement this.
-    def get(self):
+    def post(self):
         user        = users.get_current_user()
         response    = {'val': 'success'}
         
