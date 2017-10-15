@@ -737,7 +737,7 @@ var app = angular.module('noteServices', [])
   this.getUser = function() {
     var deferred = $q.defer();
     
-    httpReq('get', 'getuser').then( r => {
+    httpReq('post', 'getuser').then( r => {
       nDB.waitFor('open').then( () => {
         deferred.resolve(r.data.user_id);
       });

@@ -43,7 +43,7 @@ class Basic(webapp2.RequestHandler):
         self.response.write(page)
 
 class GetUser(webapp2.RequestHandler):
-    def get(self):
+    def post(self):
         
         user        = users.get_current_user()        
         user_id     = user.user_id() if user else None
