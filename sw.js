@@ -1,6 +1,27 @@
 // Once done, update the javascript and JQuerygoogle doc.
 var CACHE_NAME = 'green-kball-notes-v0.1.43';
 
+// added these manually since favicons are always strange and only cache 
+// when they want to, so I am forcing them here.
+let urlsToCache = [
+  '/favicon.ico',
+  '/images/favicon-16x16.png',
+  '/images/favicon-32x32.png'
+]
+
+self.addEventListener('install', function(event){
+  // At the moment, this is just to cache favicons.
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+        .then(function(cache){
+            return cache.addAll(urlsToCache);
+        })
+        .then(function(){
+          return self.skipWaiting(); 
+        })
+    );
+});
+
 // Clean up old caches, runs anytime sw.js file is modified.
 self.addEventListener('activate', function(event){
   event.waitUntil(
