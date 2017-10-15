@@ -148,6 +148,10 @@
   </md-card>
 
   <!--      DISPLAY / EDIT SELECTED NOTE CONTENT    -->
+  <!-- <div contenteditable='true' ng-bind-html='divContent' id='divEdit'> -->
+    <!-- {{divContent}}  PROBABLY REQUIRES $SCOPE.APPLY() ON THE JS SIDE OF THINGS.  -->
+  <!-- </div> -->
+
   <md-card flex ng-hide='editMode'>
     <md-card-content>
        <p ng-bind-html='n.selectedNote.content | markdown'></p> 
