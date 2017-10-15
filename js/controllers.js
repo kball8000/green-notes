@@ -15,6 +15,16 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     page: false
   }
 
+  $scope.downloadNotes = () => {    // TESTING
+    console.log('downloading notes err:', nData.allNotes);
+    let storageObj = nData.allNotes.slice();
+    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(storageObj));
+    let dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href",     dataStr     );
+    dlAnchorElem.setAttribute("download", "allNotes.json");
+    dlAnchorElem.click();
+  }
+
   // **--  LOGIN FUNCTIONS  --**
   $scope.googleLoginImg = 'btn_google_signin_dark_normal_web.png';
   $scope.googleImgChg = function(evt) {
