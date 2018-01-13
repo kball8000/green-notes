@@ -689,7 +689,6 @@ var app = angular.module('noteServices', [])
               nData.updateNote(localNote.id, serverNote);
             
               if(nData.userPrefs.selectedId === localNote.id) {
-                // data.setPref
                 nData.setPref('selectedId', newLocalNote.id);
               }
               updated = true;
