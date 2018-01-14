@@ -23,8 +23,7 @@ def verify_next_id(user, _id):
         msg     = 'not newNote, but, id: %s is below next_id: %s' %(_id, next_id)
         obj     = {'error_type': 'id', 'message': msg}
         
-        models.Error.put_error(user, obj) 
-
+        models.Error.put_error(user, obj)
 
 class Basic(webapp2.RequestHandler):
     def get(self):
@@ -58,10 +57,13 @@ class GetUser(webapp2.RequestHandler):
 
 class DelNote(webapp2.RequestHandler):
     # Have not yet and may note implement this.
-    def get(self):
+    def post(self):
         user        = users.get_current_user()
+        request     = json.loads(self.request.body)
         response    = {'val': 'success'}
         
+        logging.info('requested note to delete: %s' %request)   # TESTING
+
         notes = models.Notes.get_notes(user)
         for note in notes:
             if note.info['id'] == 1:
@@ -73,7 +75,7 @@ class DelNote(webapp2.RequestHandler):
 class GetRestore(webapp2.RequestHandler):
     """ Send user list of notes to restore from different backup
     dates. """
-    def get(self):
+    def post(self):
         """ Update backup object with latest notes from ndb. """
         user = users.get_current_user()
 
@@ -85,7 +87,6 @@ class GetRestore(webapp2.RequestHandler):
 
         self.response.headers['Content-Type'] = 'text/javascript'
         self.response.write(json.dumps(response))
-
 class GetNote(webapp2.RequestHandler):
     """Return an individual note, if updated, to app"""
     def post(self):
@@ -95,8 +96,8 @@ class GetNote(webapp2.RequestHandler):
         response        = {
             'logged_in': False, 
             'note': {}, 
-            'updated': False}
-        
+            'updated': False
+            }
         request         = json.loads(self.request.body)
         app_modified    = request['modified']
         note_id         = request['id']
@@ -114,7 +115,7 @@ class GetNote(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 class GetNotes(webapp2.RequestHandler):
     """Return all notes to app"""
-    def get(self):
+    def post(self):
         """For a user, possibly in the cookie, returns all (500 max)
         notes to the app."""
         
@@ -137,7 +138,7 @@ class GetNotes(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 class Errors(webapp2.RequestHandler):
     # TODO: Implement this. Would be nice for app to log errors on server so I can check in a centralized place.
-    def get(self):
+    def post(self):
         
         response    = []
         

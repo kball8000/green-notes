@@ -508,7 +508,6 @@ var app = angular.module('noteServices', [])
   }
 })
 
-
 .service('nServer', function($http, $mdDialog, $q, $window, nData, nDates, nDB, nUtils){
   function httpReq(_typ, url, data){
     url = $window.location.origin + '/' + url;
@@ -664,7 +663,8 @@ var app = angular.module('noteServices', [])
   this.getAll = function(evt) {
     var defer = $q.defer();
     
-    httpReq('get', 'getnotes').then( r => {
+    // TODO: Change this to post as get requests get cached and subsequent requests come from cache, not server.
+    httpReq('post', 'getnotes').then( r => {
       /* Better name is sync. It can be ignored for the day if user wants to be in an 'offline' mode in case connectivity is slow or intermittent. */
       nDB.waitFor('loaded').then( () => {
         let localNote,
@@ -749,7 +749,7 @@ var app = angular.module('noteServices', [])
   this.getRestore = function() {
     var deferred = $q.defer();
     
-    httpReq('get', 'getrestore').then( r => {
+    httpReq('post', 'getrestore').then( r => {
       nDB.waitFor('open').then( () => {
         deferred.resolve(r.data);
       });
