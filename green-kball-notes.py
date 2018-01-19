@@ -199,7 +199,7 @@ class SaveNotes(webapp2.RequestHandler):
         if user:
             response['logged_in']   = True
             for request in requests:
-                request['pendingSave'] = []
+                request['pendingSave'] = 0  # Not using this currently 1/16/2018
                 if request['newNote']:
                     response['notes'].append(process_new_note(request))
                 else:

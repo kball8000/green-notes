@@ -7,12 +7,35 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
   $mdGestureProvider.skipClickHijack();
 })
-.controller('mainCtrl', function($scope, $mdSidenav, $timeout, $location, $window, $anchorScroll, nData, nDates, nUtils, nServer, nSpeech, nDB) {
+.controller('mainCtrl', function($scope, $mdSidenav, $mdDialog, $http, $timeout, $location, $window, $anchorScroll, nData, nDates, nUtils, nServer, nSpeech, nDB) {
   $scope.editMode       = false;
   $scope.userLoggedIn   = false;
   $scope.loaded         = {
     data: false,
     page: false
+  }
+
+  // **--  TESTING  --**  
+  $scope.addHardDelete = function() {      // TESTING
+    for (let note of nData.allNotes) {
+      note.deleteHard = false;
+    }
+  }
+  $scope.getTestNote = function() {      // TESTING
+    let url   = $window.location.origin + '/getnote',
+        data  = {id: 0, modified: 0};
+    $http.post(url, data).then ( r => {
+      console.log('note:', r.data);
+    })
+  }
+  $scope.getAllNotes = function() {      // TESTING
+    let url   = $window.location.origin + '/getnotes';
+    $http.post(url).then ( r => {
+      console.log('all notes:', r.data);
+    })
+  }
+  $scope.logSelectedNote = function () {
+    console.log('id:', nData.selectedNote.id ,' selecteNote:', nData.selectedNote);
   }
 
   // **--  LOGIN FUNCTIONS  --**
@@ -62,6 +85,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     //    $scope.editMode = true;
   }
   function saveTo(db, cancel) {
+
     function cancelTimeout(db, cancel) {
       // i.e. 'dbSave' or 'serverSave'. Felt nData property name was more clear this way.
       db = db + 'Save';   
@@ -70,6 +94,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       }
       nData.timeouts[db] = '';      
     }
+
     nData.selectedNote.modified = nDates.getTimestamp();
     
     if (db === 'db' || db === 'both') {
@@ -78,7 +103,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     } 
     if (db === 'server' || db === 'both') {
       cancelTimeout('server', cancel);
-      nData.addToQueue([nData.selectedNote.id]);
+      nData.addToQueue(nData.selectedNote.id);
       nServer.save();
     }
   }
@@ -127,6 +152,31 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     }
     
   }
+  function deleteNote() {
+    let id = nData.selectedNote.id;
+    nData.nullProps(nData.selectedNote);
+
+    nData.selectedNote.id         = id;
+    nData.selectedNote.deleteHard = true;
+
+    saveTo('both', true);
+    nData.refreshDisplayNotes();
+  }
+  $scope.promptPermanentDelete = function() {
+    let confirm = $mdDialog.confirm()
+          .title('Permanently Delete Note')
+          .textContent(nData.selectedNote.title)
+          .ariaLabel('Permanently delete?')
+          .ok('Delete')
+          .cancel('Keep');
+
+    $mdDialog.show(confirm).then(function() {
+      deleteNote();
+    }, () => {
+      console.log('keeping note:', nData.selectedNote.title);
+      angular.noop;
+    });
+  }
   $scope.noteChg = function() {
     /*Runs anytime there is a change in the note input field in the app. Sets
     timeouts so that we are not saving to db and server on every character change.*/
@@ -142,16 +192,18 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   }
   $scope.starNote = function() {
     nData.selectedNote.fav = !nData.selectedNote.fav;
-    nData.modified = nDates.getTimestamp();
     saveTo('both', true);
   }
   $scope.removeNote = function() {
-    nData.removeNote();
+    nData.selectedNote.deleted  = nDates.getTimestamp();
     saveTo('both', true);
+    nData.refreshDisplayNotes();
   }
   $scope.restoreNote = function() {
-    nData.restoreNote();
+    nData.selectedNote.deleted  = 0;
     saveTo('both', true);
+    nData.userPrefs.showTrash   = false;
+    nData.refreshDisplayNotes();
   }
   
   // Speech to Text
@@ -230,7 +282,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       $timeout($scope.blurNote());
     }
   }
-
   
   // Note Actions
   $scope.toggleShowTips = function() {
@@ -312,7 +363,6 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $scope.reload = function() {
     $window.location.reload();
   }
-
 })
 .controller('leftCtrl', function($location, $scope, $mdDialog, $mdSidenav, $window, nData, nDB, nServer, nSpeech) {
   $scope.syncing = false;
@@ -324,17 +374,14 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $scope.showMoreText = 'More';
   
   nDB.waitFor('loaded', 'leftCtrl').then( retries => {
-    nData.retries = retries;    // TESTING
-
     // for html
     $scope.left = nData;
 
     // for sort ng-select in LH Nav.
     nData.userPrefs.sortBy  = nData.userPrefs.sortBy || {display: 'Date', value: 'modified'};
     $scope.reverseNotes     = nData.userPrefs.sortBy.value === 'modified';
-  }, error => {    
-    nData.retries = error;    // TESTING
-    
+
+  }, error => {
     var confirm = $mdDialog.confirm()
           .title('App Loading Failure')
           .textContent('Reload App?')
@@ -396,7 +443,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     }
   }       // NOT IMPLEMENTED YET 2017 JUNE
   
-// Bottom button controls  
+  // Bottom button controls  
   $scope.reload = function() {
     $window.location.reload();
   }
@@ -419,10 +466,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       angular.noop;
     });  
   }
-  $scope.logData = function() {
+  $scope.logData = function() {      // TESTING
     console.log('nData: ', nData);
     console.log('nDB  : ', nDB);
-  }   // TESTING
+  }
 })
 .controller('searchCtrl', function($location, nData, nSearch) {
   
@@ -458,10 +505,11 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     });    
   }
   function updateNote(note) {
-    note.deleted = [];
-    note.modified = nDates.getTimestamp();
-    nData.updateNote(note.id, note);
-    nData.addToQueue([note.id])    
+    note.deleted    = 0;
+    note.deleteHard = false;
+    note.modified   = nDates.getTimestamp();
+    nData.updateNote(note);
+    nData.addToQueue(note.id);
   }
   this.restoreNote = note => {
     updateNote(note);

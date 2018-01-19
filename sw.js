@@ -4,9 +4,19 @@ var CACHE_NAME = 'green-kball-notes-v0.1.44';
 // added these manually since favicons are always strange and only cache 
 // when they want to, so I am forcing them here.
 let urlsToCache = [
+  '/notes',
+  '/css/green-notes.css',
   '/favicon.ico',
   '/images/favicon-16x16.png',
-  '/images/favicon-32x32.png'
+  '/images/favicon-32x32.png',
+  '/js/controllers.js',
+  '/js/filters.js',
+  '/js/main.js',
+  '/js/services.js',
+  '/partials/login.html',
+  '/partials/notes.html',
+  '/partials/restore.html',
+  '/partials/search.html'
 ]
 
 self.addEventListener('install', function(event){

@@ -60,13 +60,9 @@ var app = angular.module('noteServices', [])
     timeouts:       {db: '', server: ''},
     // pending is saves sent to server and awaiting responses.
     pendingQueue:   [],
-    retries:        0,    // TESTING
     serverQueue:    [],
-    cursorLocation: 0,
     recognition:    {},
-    serverOffset:   0,
     speech:         speech,
-    timeDifference: 0,    // TESTING
     userPrefs:      {}
   };
 
@@ -89,14 +85,18 @@ var app = angular.module('noteServices', [])
   }
 
 //  Local functions 
-  function hideDeletedNotes() {
-    data.displayNotes = data.allNotes.filter((note) => {
-      return (data.userPrefs.showTrash) ? note.deleted : !note.deleted;
+  function hideDeletedNotes(arr) {
+    data.displayNotes = arr.filter((note) => {
+      if (note.deleteHard) {
+        return false;
+      } else {
+        return (data.userPrefs.showTrash) ? note.deleted : !note.deleted;
+      }
     });
-  }
-  function filterFavs() {
+  }  
+  function filterFavs(arr) {
     if (data.userPrefs.showFavs){
-      data.displayNotes = data.displayNotes.filter((n) => { return n.fav });
+      data.displayNotes = arr.filter((n) => { return n.fav });
     } 
   }
   function isListEmpty() {
@@ -133,6 +133,7 @@ var app = angular.module('noteServices', [])
     nDB._put('userPrefs', data.userPrefs);
   }
   data.createNoteObj = function(id) {
+    // if id = object, create new obj 
     let timestamp = nDates.getTimestamp();
     return {
           id:           (id === 0 || id) ? id : getNextId(),
@@ -141,46 +142,46 @@ var app = angular.module('noteServices', [])
           fav:          false,
           created:      timestamp,
           modified:     timestamp,
-          deleted:      0,
+          deleted:      0,          // soft delete, can be restored on basic page
+          deleteHard:   false,      // New in 1.45, only restorable if still in backups.
           // newNote is used by server: create note or modify existing.
           newNote:      true,
-          pendingSave:  [],
-          tags:         []
+          pendingSave:  0,
+          tags:         []          // Consider removing, tags are not used.
         }
   }
   data.refreshDisplayNotes = function() {
-    data.displayNotes = data.allNotes;
-    hideDeletedNotes();
-    filterFavs();
+    hideDeletedNotes(data.allNotes);
+    filterFavs(data.displayNotes);
     setSelectedNote();
     isListEmpty();
-  }
-  data.removeNote = function() {
-    let ts = nDates.getTimestamp();
-    data.selectedNote.modified = ts;
-    data.selectedNote.deleted  = ts;
-    data.refreshDisplayNotes();    
-  }
-  data.restoreNote = function() {
-    data.selectedNote.modified = nDates.getTimestamp();
-    data.selectedNote.deleted  = 0;
-    data.refreshDisplayNotes();        
   }
   data.selectNote = function() {
     setSelectedNote();
   }
-  data.updateNote = function(id, newData) {    
+  data.updateNote = function(newData, id) {
+    id = (id === undefined) ? newData.id : id;
     let note = nUtils.getById(data.allNotes, id);
-    angular.forEach(newData, (value, key) => note[key] = value);    
+
+    angular.forEach(newData, (value, key) => note[key] = value);
+    
     return note;
+  }
+  data.nullProps = function(note) {
+    for (key in note) {
+      note[key] = null;
+    }
   }
   data.alertUserIfDuplicateTitle = () => {
     function duplicateTitle() {        
-      let count = 0,
-          title = data.selectedNote.title;
+      let count = 0;
 
       data.allNotes.forEach( note => {
-        (note.title.toLowerCase() === title.toLowerCase()) ? count++ : 0;
+        if (note.title && data.selectedNote.title) {
+          if (note.title.toLowerCase() === data.selectedNote.title.toLowerCase()) {
+            count++;
+          }
+        }
       })
 
       return count > 1;
@@ -207,8 +208,8 @@ var app = angular.module('noteServices', [])
       checkStalePendingNote(note);
     })    
   }
-  data.addToQueue = function(_ids) {
-    let ids = (Array.isArray(_ids)) ? _ids : [_ids];
+  data.addToQueue = function(ids) {
+    ids = (Array.isArray(ids)) ? ids : [ids];
     let inPendingQueue, inServerQueue, note;
     
     ids.forEach( id => {
@@ -216,7 +217,9 @@ var app = angular.module('noteServices', [])
       inServerQueue   = nUtils.idInList(data.serverQueue, id);
       note            = nUtils.getById(data.allNotes, id);
       if(!inPendingQueue && !inServerQueue){
-        data.serverQueue.push(note);      
+        if (typeof note === 'object') {
+          data.serverQueue.push(note);
+        }
       } else if(inPendingQueue){
         checkStalePendingNote(note);
       }
@@ -224,9 +227,13 @@ var app = angular.module('noteServices', [])
   }
   data.requestToSave = function() {
     angular.forEach(data.serverQueue, note => {
-      note.pendingSave = nDates.getTimestamp();
-      if (!nUtils.idInList(data.pendingQueue, note.id)) {
-        data.pendingQueue.push(note);
+      if (typeof note === 'object') {
+        note.pendingSave = nDates.getTimestamp();
+        if (!nUtils.idInList(data.pendingQueue, note.id)) {
+          data.pendingQueue.push(note);
+        }  
+      } else {
+        console.log('non object ended up in serverQueue');
       }
     })
     data.serverQueue = [];
@@ -245,7 +252,6 @@ var app = angular.module('noteServices', [])
   function getUserKey(key) {
     return userId + '-' + key;
   }
-
   this.setUserId = function(newUserId) {
     if (newUserId) {
       userId = newUserId;
@@ -445,7 +451,6 @@ var app = angular.module('noteServices', [])
     newStr = replaceNumbers(newStr);
     return newStr;
   }
-
   this.startListeningAnimation = () => {
     // function startListeningAnimation() {
     let ticks     = 0, 
@@ -503,11 +508,10 @@ var app = angular.module('noteServices', [])
 
     // Save Selected Note
     nDB._put('allNotes', nData.allNotes);
-    nData.addToQueue([nData.selectedNote.id]);
+    nData.addToQueue(nData.selectedNote.id);
     nServer.save();
   }
 })
-
 .service('nServer', function($http, $mdDialog, $q, $window, nData, nDates, nDB, nUtils){
   function httpReq(_typ, url, data){
     url = $window.location.origin + '/' + url;
@@ -541,9 +545,8 @@ var app = angular.module('noteServices', [])
       httpReq('post', 'savenotes', nData.serverQueue).then( r => {
         if(r.data.logged_in) {
           processNextId(r.data.next_id);
-          nData.timeDifference = Date.now() - r.data.time;
           angular.forEach(r.data.notes, note => {
-              processNoteResponse(note);
+            processNoteResponse(note);
           });
         } else {
           userLogin(r.data.login_url, 'savenote');
@@ -560,19 +563,25 @@ var app = angular.module('noteServices', [])
     nUtils.removeById(nData.pendingQueue, note.id);
     
     if (note.modified !== modified_serv) {
-      nData.addToQueue([note.id]);
+      nData.addToQueue(note.id);
       saveNotes();
     }
   }
+  function clearPendingSaveTimestamp(note) {
+    if (!nUtils.idInList(nData.pendingQueue, note.id)) {
+      note.pendingSave = 0;
+    }
+  }
   function processNewNote(serverData) {
-    let id = serverData.initial_id || serverData.id;
-    let note = nUtils.getById(nData.allNotes, id);
+    let id    = serverData.initial_id || serverData.id,
+        note  = nUtils.getById(nData.allNotes, id);
     
     if(serverData.saved || serverData.duplicate) {
       note.id       = serverData.id;
       note.newNote  = false;
     }
     
+    // id changed because id already existed on server.
     if (serverData.initial_id === nData.userPrefs.selectedId) {
       nData.setPref('selectedId', serverData.id);
     }
@@ -580,11 +589,11 @@ var app = angular.module('noteServices', [])
     return note
   }
   function processNoteResponse(data) {
-    var note, saveNotesToDb = true;
+    let note, saveNotesToDb = true;
     if (data.new_note) {  // newNote
       note  = processNewNote(data);
     } else if (data.old){ // conflict, server had latest note
-      note = nData.updateNote(data.id, data.update_from_server);
+      note = nData.updateNote(data.update_from_server);
     } else {              // STD
       note = nUtils.getById(nData.allNotes, data.id);
       saveNotesToDb = false;
@@ -597,16 +606,13 @@ var app = angular.module('noteServices', [])
     // important to use data.modified as it is the timestamp of the note sent to server
     // for save and note.modified could've been updated locally by user editing note.
     removeFromServerQueue(note, data.modified);
-
+    clearPendingSaveTimestamp(note);
+    
   }
-  function processNextId(id) {    
+  function processNextId(id) {
     if(id > nData.userPrefs.nextId){
       nData.setPref('nextId', id);
     }
-  }
-  function processTimeSync(serverTs) {
-    // Not using this currently in syncing solution 2017 May 16.
-    nData.serverOffset = new Date() - nDates.toDate(serverTs);
   }
   function removeDuplicates() {
     
@@ -651,12 +657,12 @@ var app = angular.module('noteServices', [])
     httpReq('post', 'getnote', data).then( r => {
       if (r.data.logged_in) {
         if (r.data.updated){
-          nData.updateNote(r.data.note.id, r.data.note);
+          nData.updateNote(r.data.note);
           nData.refreshDisplayNotes();
           nDB._put('allNotes', nData.allNotes);
         }
       } else {
-        userLogin(r.data.login_url, evt);
+        userLogin(r.data.login_url, 'getNote');
       }
     })
   }
@@ -679,26 +685,35 @@ var app = angular.module('noteServices', [])
             if (!localNote) {
               localNote = nData.createNoteObj(serverNote.id);
               nData.allNotes.push(localNote);
-              nData.updateNote(serverNote.id, serverNote);
-              updated = true;
-              
+              nData.updateNote(serverNote);
+              updated   = true;
+
             } else if (localNote.newNote) {
+              // Case when server says it has a note with x id and locally we recently created a note
+              // so it still has the newNote tag, obviously not saved to server yet, resolve the confict
+              // by moving the localnote to a new id.
               let newLocalNote = nData.createNoteObj();
               nData.allNotes.push(newLocalNote);
-              nData.updateNote(newLocalNote.id, localNote);
-              nData.updateNote(localNote.id, serverNote);
-            
+              nData.updateNote(localNote, newLocalNote.id);
+              nData.updateNote(serverNote, localNote.id);
+
               if(nData.userPrefs.selectedId === localNote.id) {
                 nData.setPref('selectedId', newLocalNote.id);
               }
               updated = true;
+
+              nData.addToQueue(newLocalNote.id);
+              saveNotes();
               
             } else if (serverNote.modified > localNote.modified) {
-              nData.updateNote(serverNote.id, serverNote);
+              nData.updateNote(serverNote);
               updated = true;
               
             } else if (serverNote.modified < localNote.modified) {
-              nData.addToQueue([serverNote.id]);
+              // maybe absurd case, but where normal flow just didn't save note to server, add to queue
+              // if it is not already there.
+              nData.addToQueue(serverNote.id);
+              saveNotes();
             }
           })
         }
@@ -706,9 +721,9 @@ var app = angular.module('noteServices', [])
         if (r.data.logged_in) {
           processNextId(r.data.next_id);
           processNotes(r.data.notes);
-          nData.timeDifference = Date.now() - r.data.time;
           findNotesToSync(serverIds);
-          this.save();
+          saveNotes();
+          // this.save();
           // TODO add some functionality to server to delete so that I can run
           // run the remove dups first. this.save can do all three, update notes,
           // create notes and delete notes from server, not just the soft delete from 
@@ -722,13 +737,10 @@ var app = angular.module('noteServices', [])
         } else {
           userLogin(r.data.login_url, evt);
         }
-        
-        defer.resolve();
-        
+        defer.resolve(); 
       })
-      
-    }, function(r) {
-      defer.resolve();
+    }, e =>  {
+      defer.reject('could not get data from server, error:', e);
     })
     
     return defer.promise;

@@ -170,12 +170,26 @@
 
           <div ng-view ng-show='loaded.page'></div>
 
+<!--      TEST BUTTONS    -->
+          <button ng-click="addHardDelete()">
+            addDel
+          </button>
+          <button ng-click="getTestNote()">
+            gTNote
+          </button>
+          <button ng-click="getAllNotes()">
+            gNotes
+          </button>
+          <button ng-click="logSelectedNote()">
+            selNote
+          </button>
+
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
             Version: 0.1.44
           </p>
 
-          <h4 ng-click='toggleShowTips()' style="padding: 0.5em 0 0 1.5em;" id='tips'>
+          <h4 ng-click='toggleShowTips()' style="padding: 0.5em 0 0 1.5em; width:50%;" id='tips'>
               <span style='padding-right:1.5em;'>Tips</span>
               <md-button class='md-icon-button'>
                   <md-icon>
@@ -232,8 +246,6 @@
             <li>Selected Title: {{n.selectedNote.title}}</li>
             <li>Selected Content: {{n.selectedNote.content}}</li>
             <li>Edit Mode: {{editMode}}</li>
-            <li>Hi leftCtrl Retries Left: {{n.retries}}</li>
-            <li>Milliseconds between client and server: {{n.timeDifference}}</li>
             <li>loaded.data: {{loaded.data}}</li>
             <li>loaded.page: {{loaded.page}}</li>
             <li>userLoggedIn: {{userLoggedIn}}</li>

@@ -20,7 +20,7 @@
                  ng-model='n.selectedNote.title'
                  ng-blur='blurNote("title")'
                  ng-click='setEditMode()'
-                 ng-disabled='n.userPrefs.noNote'
+                 ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'
                  ng-init='titleColor="darkgray"'
                  ng-focus='titleColor="black"'
                  ng-blur='titleColor="darkgray"'>
@@ -85,22 +85,33 @@
         </md-icon>
       </md-button>
     </div>
-    <div flex='20' style="text-align:center;">
+    <div flex='20' style="text-align:center;" ng-hide='n.userPrefs.showTrash'>
       <md-button class='md-icon-button md-primary'
                  ng-click='starNote()'
                  ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'>
+                 <!-- ng-disabled='n.userPrefs.noNote || n.userPrefs.showTrash'> -->
         <md-icon>
           {{n.selectedNote.fav ? 'star' : 'star_border'}}
+        </md-icon>
+      </md-button>
+    </div>
+    <div flex='20' style="text-align:center;" ng-show='n.userPrefs.showTrash'>
+      <md-button class='md-icon-button md-primary'
+                 ng-click='restoreNote()'
+                 ng-disabled='n.userPrefs.noNote'>
+        <md-icon>
+          restore
         </md-icon>
       </md-button>
     </div>
     <div flex='20' 
          style="text-align:center;">
       <md-button class='md-icon-button md-primary'
-                 ng-click='n.userPrefs.showTrash ? restoreNote() : removeNote()'
+                 ng-click='n.userPrefs.showTrash ? promptPermanentDelete() : removeNote()'
                  ng-disabled='n.userPrefs.noNote'>
         <md-icon>
-          {{n.userPrefs.showTrash ? 'restore' : 'delete'}}
+          delete
+          <!-- {{n.userPrefs.showTrash ? 'restore' : 'delete'}} -->
         </md-icon>
       </md-button>
     </div>
