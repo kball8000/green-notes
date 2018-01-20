@@ -167,10 +167,13 @@ var app = angular.module('noteServices', [])
     
     return note;
   }
-  data.nullProps = function(note) {
-    for (key in note) {
-      note[key] = null;
-    }
+  data.clearProps = function(note) {
+    note.title          = '';
+    note.content        = '';
+    note.created        = 0;
+    note.cursorLocation = 0;
+    note.deleted        = 0;
+    note.tags           = [];
   }
   data.alertUserIfDuplicateTitle = () => {
     function duplicateTitle() {        

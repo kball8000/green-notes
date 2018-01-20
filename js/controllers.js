@@ -71,8 +71,26 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   // **--  NOTES FUNCTIONS  --**
   function focusInput(val) {
     let el = $window.document.getElementById(val);
-    $timeout( () => {el.focus()} );   // timetout is for searchInput.
+    $timeout( () => { 
+      if (el) {
+        el.focus();
+      }
+    });
   }
+  function focusSearchInput() {
+    let val = 'searchInput';
+    let el = $window.document.getElementById(val);
+    if (el) {
+      focusInput('searchInput');
+    } else {
+      console.log('taking some time to load searchtext input box in order to focus it, give it one more try.');
+      $timeout( () => { 
+        el = $window.document.getElementById(val);
+        focusInput('searchInput');
+      }, 500 )
+    }
+  }
+
   function focusTextArea() {
     let el = $window.document.getElementById('noteArea');
     el.focus();
@@ -153,12 +171,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     
   }
   function deleteNote() {
-    let id = nData.selectedNote.id;
-    nData.nullProps(nData.selectedNote);
-
-    nData.selectedNote.id         = id;
+    nData.clearProps(nData.selectedNote);
     nData.selectedNote.deleteHard = true;
-
     saveTo('both', true);
     nData.refreshDisplayNotes();
   }
@@ -193,6 +207,7 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $scope.starNote = function() {
     nData.selectedNote.fav = !nData.selectedNote.fav;
     saveTo('both', true);
+    nData.refreshDisplayNotes();
   }
   $scope.removeNote = function() {
     nData.selectedNote.deleted  = nDates.getTimestamp();
@@ -253,7 +268,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   // area, not to be confused with formated note in readonly mode.
   function goToSearch() {
     document.getElementById('searchBtn').click();
-    $timeout(focusInput('searchInput'));
+    // $timeout(focusInput('searchInput'));
+    $timeout(focusSearchInput());
   }
   $window.onclick = e => {
     // $window.document.onclick = e => {
@@ -418,6 +434,11 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     $scope.reverseNotes = (option.display === 'Date');
   }
   $scope.selectNote = function(note) { 
+
+    /**
+     * TODO: Add a check that if we are not in notes page to take us there, 
+     * not sure if we are on restore page, though.
+    */
     nData.setPref('selectedId', note.id);
     nData.selectNote();
     nServer.getNote(note);              // Checks for updated note on server.
@@ -476,8 +497,11 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   this.s = nData;
   this.cbFavs = false;
   this.cbTrash = false;
+
+  nData.userPrefs.showTrash = false;
+  nData.refreshDisplayNotes();
   
-  this.selectedItemChange = function(x) {    
+  this.selectedItemChange = function(x) {
     nData.setPref('selectedId', x.id);
     nData.selectNote();
     $location.path('/notes');
