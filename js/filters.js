@@ -11,7 +11,7 @@ angular.module('nFilters', [])
     if (line.indexOf('.h1 ') !== -1) {
        line = '<p class="headerM">' + line.slice(4) + '</p>'
     } else if(line === '---') {
-      line = '<hr>'
+      line = '<hr>';
     } else {
       line = line.indexOf('- ') === 0 ? '&bull; ' + line[2].toUpperCase() + line.slice(3) : line;
       line += '<br>';
@@ -85,8 +85,8 @@ angular.module('nFilters', [])
      * Creates a link out string, i.e. <a href="url">anchorText</a>
      */
 
-    let anchorRe  = new RegExp( /\([\w.,'! :-_]+\)/ );
-    let hrefRe    = new RegExp( /\[http[\w:/.?=&;@$+!*'()_-]+\]/ );
+    let anchorRe  = new RegExp( /\([\w.,'! :-_#$]+\)/ );
+    let hrefRe    = new RegExp( /\[http[\w:/.?=&;@$/+!*'()_%#-]+\]/ );
     let regex     = new RegExp(anchorRe.source + hrefRe.source, 'g');
     let matches   = line.match(regex),
         count, href, hrefMatch, anchor, anchorMatch, orig, html;
@@ -108,15 +108,35 @@ angular.module('nFilters', [])
   }
   function formatDateHeader(line) {
     let re = /\d{1,2}[./]\d{1,2}[./]\d{4}/;
+
+    function getMonth(x) {
+      let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return months[x];
+    }
         
     // length is 10 for date and 4 for '<br>'.
     if (line && line.length < 15 && line.match(re)) {
-      line = line.replace(/\//g, ' / ');
+      let vals = line.split('/');
+      line = getMonth(vals[0]) + ' ' + vals[1] + ', ' + vals[2];
       line = '<p class="dateBlock">' + line + '</p>';
     }
 
     return line;
   }
+  function removeGroceryLine(line) {
+    /**
+     * Intended for grocery lists, lines that end with ' oo' are omitted.
+     */
+
+    if (line.endsWith(' oo<br>')) {
+      console.log('endswith oo:');
+      line = '';
+    }
+    return line;
+  }
+
+  console.log('--- START ---');
+  
   return input => {
     input = input || '';
     let lines = input.split('\n'),
@@ -126,10 +146,27 @@ angular.module('nFilters', [])
           line = formatLine(line);
           line = formatPhoneNum(line);
           line = formatUrls(line);
+          line = removeGroceryLine(line);
           
           return line;
         });
 
+    return breakLines.join('');
+  }
+})
+.filter('grocery', () => {
+  function addCheckBoxes(line) {
+    
+  }
+
+  return input => {
+    input = input || '';
+    let lines = input.split('\n'),
+        breakLines = lines.map( line => {
+          line = addCheckBoxes(line);
+          return line;
+        });
+    
     return breakLines.join('');
   }
 });
