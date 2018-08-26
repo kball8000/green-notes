@@ -189,16 +189,17 @@
 
 <!--      APP VERSION    -->
           <p style="color:darkgray; font-size:0.8em; padding-left:0.3em;">
-            Version: 0.1.45
+            Version: 0.1.46
           </p>
 
-          <h4 ng-click='toggleShowTips()' style="padding: 0.5em 0 0 1.5em; width:50%;" id='tips'>
-              <span style='padding-right:1.5em;'>Tips</span>
+          <h4 ng-click='toggleShowTips()' style="padding: 0.5em 0 0 1em; width:30%;" id='tips'>
+              <!-- <span style='padding-right:1em;'>Tips</span> -->
+              <span>Tips</span>
               <md-button class='md-icon-button'>
                   <md-icon>
-                      {{ showTips ? 'expand_less' : 'expand_more' }} 
-                    </md-icon>      
-              </md-button>    
+                      {{ showTips ? 'expand_less' : 'expand_more' }}
+                    </md-icon>
+              </md-button>
           </h4>          
 
           <div ng-show='showTips'>

@@ -10,6 +10,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
 .controller('mainCtrl', function($scope, $mdSidenav, $mdDialog, $http, $timeout, $location, $window, $anchorScroll, nData, nDates, nUtils, nServer, nSpeech, nDB) {
   $scope.editMode       = false;
   $scope.userLoggedIn   = false;
+  $scope.lastPageBlur   = 0;    // Used to keep note editable when changing tabs.
+  $scope.lastNoteBlur   = 0;    // Used to keep note editable when changing tabs.
   $scope.loaded         = {
     data: false,
     page: false
@@ -69,38 +71,18 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   }
    
   // **--  NOTES FUNCTIONS  --**
-  function focusInput(val) {
-    let el = $window.document.getElementById(val);
-    $timeout( () => { 
-      if (el) {
-        el.focus();
-      }
-    });
-  }
-  function focusSearchInput() {
-    let val = 'searchInput';
-    let el = $window.document.getElementById(val);
-    if (el) {
-      focusInput('searchInput');
-    } else {
-      console.log('taking some time to load searchtext input box in order to focus it, give it one more try.');
-      $timeout( () => { 
-        el = $window.document.getElementById(val);
-        focusInput('searchInput');
-      }, 500 )
-    }
-  }
-
   function focusTextArea() {
-    let el = $window.document.getElementById('noteArea');
-    el.focus();
-    let cursor = nData.selectedNote.cursorLocation || 0;
-    el.selectionStart = cursor;
-    el.selectionEnd = cursor;
+    let promise = nUtils.setFocus('noteArea');
+    let cursor  = nData.selectedNote.cursorLocation || 0;
 
+    promise.then((r) => {
+      r.el.selectionStart = cursor;
+      r.el.selectionEnd   = cursor;
+    }, (e) => {
+      console.log('failed to set focus to element id: ', e.val);
+    })
     // quirky, if I left this in edit note, caused complete note to toggle, edit note worked fine.
     // hurts my head to think about why that was.
-    //    $scope.editMode = true;
   }
   function saveTo(db, cancel) {
 
@@ -137,8 +119,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     
     $scope.editMode = true;     // To display textarea.
     nData.pristineNote = false;
-    focusInput('noteTitle');
-    saveTo('both');
+    nUtils.setFocus('noteTitle');
+    saveTo('both');  
   }
   $scope.editNote = function() {
     /* Change from view only to edit mode so user can edit the selected note */
@@ -162,7 +144,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       nData.alertUserIfDuplicateTitle();
     } else {
       saveCursorLocation();
-      $scope.editMode = false;
+      $scope.editMode     = false;
+      $scope.lastNoteBlur = Date.now();
     }
 
     if (!nData.pristineNote) {
@@ -267,18 +250,28 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   // This gets out of edit mode if clicking anywhere other than title or notearea, the note input 
   // area, not to be confused with formated note in readonly mode.
   function goToSearch() {
-    document.getElementById('searchBtn').click();
-    // $timeout(focusInput('searchInput'));
-    $timeout(focusSearchInput());
+    $location.path('/search');
+    $timeout($scope.digest);
+  }
+  function editNoteShortcut() {
+    if ($window.location.pathname === '/notes') {
+      $scope.editNote();
+    }
+  }
+  function newNoteShortcut() {
+    if ($window.location.pathname === '/notes') {
+      $scope.newNote();
+    }
   }
   $window.onclick = e => {
-    // $window.document.onclick = e => {
     let edits = {
-      noteTitle:  true,
-      noteArea:   true,
-      doneButton: true,
-      editButton: true,
-      editIcon:   true
+      newNoteButton:  true,
+      newNoteIcon:    true,
+      noteTitle:      true,
+      noteArea:       true,
+      doneButton:     true,
+      editButton:     true,
+      editIcon:       true
     };
     if ( !(e.target.id in edits) ) {
       $scope.editMode = false;
@@ -288,8 +281,8 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $window.document.onkeyup = e => {
     // Using keyup so that escape key will work, could not figure it out on keypress.
     let shortcuts = {
-      69: $scope.editNote,    // e char to edit note
-      78: $scope.newNote,     // n char for new note
+      69: editNoteShortcut,   // e char to edit note
+      78: newNoteShortcut,    // n char for new note
       83: goToSearch          // s char for search
     };
     if (e.keyCode in shortcuts && $scope.editMode === false && e.target.id !== 'searchInput') {
@@ -298,7 +291,20 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
       $timeout($scope.blurNote());
     }
   }
-  
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      $scope.lastPageBlur = Date.now();
+    } else {
+      let diff = Math.abs($scope.lastNoteBlur - $scope.lastPageBlur);
+      if (diff < 100) {
+        $scope.editMode = true;
+        $timeout(focusTextArea, 50);
+      }
+    }    
+  }
+  // Leaves note edit mode if in edit mode when switching tabs.
+  document.addEventListener('visibilitychange', handleVisibilityChange, false);
+
   // Note Actions
   $scope.toggleShowTips = function() {
     // Expands / collapses the Tips secion at the bottom of the notes page.
@@ -439,11 +445,20 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
      * TODO: Add a check that if we are not in notes page to take us there, 
      * not sure if we are on restore page, though.
     */
+    let leavePages = {
+      '/search':  true,
+      '/restore': true
+    };
+
     nData.setPref('selectedId', note.id);
     nData.selectNote();
     nServer.getNote(note);              // Checks for updated note on server.
     nSpeech.clearTranslationBox();
     $mdSidenav('left').close();
+    if ($window.location.pathname in leavePages) {
+      $location.path('/notes');
+    }
+    $window.scrollTo(0, 0);
   }
   $scope.showMore = () => {
     console.log('running showmore, does not work well at boundary');
@@ -492,15 +507,12 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     console.log('nDB  : ', nDB);
   }
 })
-.controller('searchCtrl', function($location, nData, nSearch) {
+.controller('searchCtrl', function($location, $timeout, $window, nData, nSearch, nUtils) {
   
   this.s = nData;
   this.cbFavs = false;
   this.cbTrash = false;
 
-  nData.userPrefs.showTrash = false;
-  nData.refreshDisplayNotes();
-  
   this.selectedItemChange = function(x) {
     nData.setPref('selectedId', x.id);
     nData.selectNote();
@@ -509,6 +521,10 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   this.querySearch = function(query) {
     return nSearch.querySearch(query, this.cbFavs, this.cbTrash);
   }
+
+  nData.userPrefs.showTrash = false;
+  nData.refreshDisplayNotes();
+  nUtils.setFocus('searchInput');  
 })
 .controller('restoreCtrl', function(nData, nDB, nServer, nDates) {
   

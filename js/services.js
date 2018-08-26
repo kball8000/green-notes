@@ -10,7 +10,7 @@ var app = angular.module('noteServices', [])
     return Date.now() - timestamp > duration;
   }
 })
-.service('nUtils', function() {
+.service('nUtils', function($q, $timeout, $window) {
   this.replElemString = function(text, elem, newElem) {
     let idx = text.indexOf(elem);
     while(idx !== -1){
@@ -37,8 +37,32 @@ var app = angular.module('noteServices', [])
     list.splice(index, 1);
     
   }
-  this.idInList = function(arr, id) {    
+  this.idInList = function(arr, id) {
     return arr.findIndex( note => { return id === note.id; }) !== -1;
+  }
+  this.setFocus = function(val) {
+    let wait      = [0, 10, 50, 200, 1000],
+        deferred  = $q.defer();
+        i         = 0;
+
+    function setFocus(){
+
+      let el = $window.document.getElementById(val);
+      i++;
+
+      if (el) {
+        el.focus();
+        deferred.resolve({status:'ok', val: val, el: el});
+      } else if (i < wait.length) {
+        $timeout(setFocus, wait[i]);
+      } else {
+        deferred.reject({status:'failed', val: val, el: window})
+      }
+    }
+
+    $timeout(setFocus, wait[i]);
+
+    return deferred.promise;
   }
 })
 .service('nData', function($mdDialog, nDates, nUtils, nDB) {

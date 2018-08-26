@@ -27,11 +27,11 @@
         </div>
 
         <div flex='25'>
-          <md-button ng-click='newNote()' 
-                     ng-disabled='n.userPrefs.showTrash'
+          <md-button class='md-primary md-raised md-icon-button'
                      id='newNoteButton'
-                     class='md-primary md-raised md-icon-button'>
-            <md-icon>
+                     ng-click='newNote()'
+                     ng-disabled='n.userPrefs.showTrash'>
+            <md-icon id='newNoteIcon'>
               note_add
             </md-icon>
           </md-button>
