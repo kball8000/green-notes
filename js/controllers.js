@@ -292,11 +292,13 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
     }
   }
   function handleVisibilityChange() {
+    // console.log('visibility change is running at:', performance.now());
     if (document.hidden) {
       $scope.lastPageBlur = Date.now();
     } else {
       let diff = Math.abs($scope.lastNoteBlur - $scope.lastPageBlur);
-      if (diff < 100) {
+      // if (diff < 100) {
+      if (diff < 100 && $scope.lastPageBlur > 0) {
         $scope.editMode = true;
         $timeout(focusTextArea, 50);
       }
@@ -505,6 +507,15 @@ var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnim
   $scope.logData = function() {      // TESTING
     console.log('nData: ', nData);
     console.log('nDB  : ', nDB);
+  }
+  $scope.downloadNotes = function() {
+    console.log('downloading all notes');
+    let storageObj = nData.allNotes;
+    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(storageObj));
+    let dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href",     dataStr     );
+    dlAnchorElem.setAttribute("download", "all_notes.json");
+    dlAnchorElem.click();    
   }
 })
 .controller('searchCtrl', function($location, $timeout, $window, nData, nSearch, nUtils) {

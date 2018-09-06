@@ -1,5 +1,5 @@
 // Once done, update the javascript and JQuerygoogle doc.
-var CACHE_NAME = 'green-kball-notes-v0.1.46';
+var CACHE_NAME = 'green-kball-notes-v0.1.46.1';
 
 // added these manually since favicons are always strange and only cache 
 // when they want to, so I am forcing them here.
