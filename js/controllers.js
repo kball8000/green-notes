@@ -3,7 +3,7 @@
 
 var cont = angular.module('greenNotesCtrl', ['noteServices', 'nFilters', 'ngAnimate', 'ngMaterial', 'ngMessages', 'ngSanitize'])
 .config(function($mdGestureProvider, $mdThemingProvider) {
-  $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow');
+  $mdThemingProvider.theme('default').primaryPalette('green').accentPalette('yellow').dark();
   $mdThemingProvider.theme('light-green').backgroundPalette('light-green').dark();
   $mdGestureProvider.skipClickHijack();
 })
